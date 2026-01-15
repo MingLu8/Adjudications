@@ -1,0 +1,19 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: adjudication-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: adjudication-worker # Must match your Deployment name
+  minReplicaCount: 2          # Keep 2 pods warm (High Availability)
+  maxReplicaCount: 50         # Burst limit
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: kafka:9092
+        consumerGroup: adjudication-worker-group
+        topic: pharmacy-claims
+        lagThreshold: "10"    # Scale up if lag > 10 messages
+        offsetResetPolicy: latest
+
