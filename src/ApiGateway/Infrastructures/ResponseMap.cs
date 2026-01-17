@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 namespace ApiGateway.Infrastructures
 {
-    public class ResponseMap : IResponseMap
+    public class ResponseMap(ILogger<ResponseMap> logger) : IResponseMap
     {
         private readonly ConcurrentDictionary<string, TaskCompletionSource<ClaimResponse>> _map = new();
 
@@ -19,9 +19,15 @@ namespace ApiGateway.Infrastructures
         {
             if (_map.TryRemove(transactionId, out var tcs))
             {
-                tcs.TrySetResult(response);
+                logger.LogInformation("Connection found for TransactionId: {TransactionId}", transactionId);
+                if(tcs.TrySetResult(response))
+                    logger.LogInformation("Forworded response for TransactionId: {TransactionId}", transactionId);
+                else
+                    logger.LogWarning("Failed to forward response for TransactionId: {TransactionId}", transactionId);
                 return true;
             }
+            else
+                logger.LogWarning("Connection not found for TransactionId: {TransactionId}", transactionId);
             return false;
         }
 

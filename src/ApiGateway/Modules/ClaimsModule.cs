@@ -38,7 +38,7 @@ public static class ClaimsModule
         try
         {
             var result = await gateway.ProcessAsync(ncpdp, token);
-            logger.LogInformation("Successfully adjudicated claim; returning response for request from {RemoteIp}", ctx.Connection.RemoteIpAddress);
+            logger.LogInformation("Completed processing claim; returning response for request from {RemoteIp}", ctx.Connection.RemoteIpAddress);
             return Results.Text(result);
         }
         catch (TimeoutException)

@@ -1,9 +1,10 @@
 namespace AdjudicationWorker;
 
-using System.Text.Json;
 using Confluent.Kafka;
-using StackExchange.Redis;
 using SharedContracts;
+using StackExchange.Redis;
+using System.Security.Claims;
+using System.Text.Json;
 
 public class ClaimWorker(
     IConsumer<Ignore, string> consumer,
@@ -15,43 +16,70 @@ public class ClaimWorker(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         consumer.Subscribe(kafkaSettings.ClaimsTopic);
-
+       
         logger.LogInformation("Adjudication Worker Started...");
-
+        ClaimRequest? claim = null;
         try
         {
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
+                    var db = redis.GetDatabase();
+                    var sub = redis.GetSubscriber();
+
                     // 1. Consume from Kafka
                     var consumeResult = consumer.Consume(stoppingToken);
-                    var claimRequest = JsonSerializer.Deserialize<ClaimRequest>(consumeResult.Message.Value);
+                    claim = JsonSerializer.Deserialize<ClaimRequest>(consumeResult.Message.Value);
 
-                    if (claimRequest == null) continue;
+                    if (claim == null) continue;
 
-                    logger.LogInformation($"Processing Claim: {claimRequest.TransactionId}");
+                    logger.LogInformation($"Processing Claim: {claim.TransactionId}");
+                    var startTimeValue = await db.StringGetAsync($"claim_start:{claim.TransactionId}");
+
+                    if (startTimeValue.HasValue)
+                    {
+                        var startTime = (long)startTimeValue;
+                        var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+                        if (currentTime - startTime > redisSettings.MaxProcessingAgeSeconds)
+                        {
+                            logger.LogWarning("Bypassing stale claim {Id}. Age: {Age}s",
+                                claim.TransactionId, currentTime - startTime);
+
+                            // Cleanup and move to next message without processing
+                            await db.KeyDeleteAsync($"claim_start:{claim.TransactionId}");
+                            await sub.PublishAsync(RedisChannel.Literal(redisSettings.ResponseChannel), JsonSerializer.Serialize(new ClaimResponse
+                            {
+                                TransactionId = claim.TransactionId,
+                                NcpdpResponsePayload = $"REJECTED|{claim.NcpdpPayload}|TIMEOUT",
+                                Success = true
+                            }));
+                            consumer.Commit(consumeResult);
+                            continue;
+                        }
+                    }
 
                     // 2. SIMULATE ADJUDICATION LOGIC (Pricing, DUR, etc.)
-                    var adjudicationResult = await ProcessClaimAsync(claimRequest);// await Task.Delay(50); // Simulate 50ms processing time
-                    var responsePayload = $"PAID|{claimRequest.NcpdpPayload}|APPROVED";
+                    var adjudicationResult = await ProcessClaimAsync(claim);// await Task.Delay(50); // Simulate 50ms processing time
+                    var responsePayload = $"PAID|{claim.NcpdpPayload}|APPROVED";
 
                     // 3. Create Response
                     var response = new ClaimResponse
                     {
-                        TransactionId = claimRequest.TransactionId,
+                        TransactionId = claim.TransactionId,
                         NcpdpResponsePayload = responsePayload,
                         Success = true
                     };
 
                     // 4. Publish to Redis (The Broadcast)
-                    var sub = redis.GetSubscriber();
+                   
                     await sub.PublishAsync(RedisChannel.Literal(redisSettings.ResponseChannel), JsonSerializer.Serialize(response));
                     consumer.Commit(consumeResult);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Error processing individual claim message.");
+                    logger.LogError(ex, $"Error processing individual claim message: {claim?.TransactionId}.");
                     // Optional: consumer.StoreOffset(consumeResult) or handle DLQ
                 }
             }
@@ -59,6 +87,7 @@ public class ClaimWorker(
         catch (OperationCanceledException)
         {
             consumer.Close();
+            logger.LogWarning($"Operation cancelled for claim message: {claim?.TransactionId}.");
         }
     }
 
@@ -95,7 +124,7 @@ public class ClaimWorker(
         //}
 
         //return ProcessFinalDecision(eligibility, formulary, null);
-        await Task.Delay(50); // Simulate 50ms processing time
+        await Task.Delay(50000); // Simulate 50ms processing time
         return new AdjudicationResult();
     }
 }
