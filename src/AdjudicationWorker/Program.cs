@@ -1,46 +1,33 @@
 using AdjudicationWorker;
-using Confluent.Kafka;
-using Microsoft.Extensions.Options;
-using StackExchange.Redis;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-// --- 1. BIND CONFIGURATION ---
-builder.Services.Configure<RedisSettings>(builder.Configuration.GetSection("RedisSettings"));
-builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("KafkaSettings"));
+// Core worker dependencies (Kafka, Redis, typed clients, orchestrator, API caller, ActivitySource)
+builder.Services.AddAdjudicationWorkerCore(builder.Configuration);
 
-// Register as flat objects for clean injection
-builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<RedisSettings>>().Value);
-builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<KafkaSettings>>().Value);
-
-
-// --- 2. INFRASTRUCTURE SETUP ---
-
-// Redis Setup
-builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-{
-    var redisSettings = sp.GetRequiredService<RedisSettings>();
-    return ConnectionMultiplexer.Connect(redisSettings.ConnectionString);
-});
-
-// Kafka Consumer Setup
-builder.Services.AddSingleton<IConsumer<Ignore, string>>(sp =>
-{
-    var kafkaSettings = sp.GetRequiredService<KafkaSettings>();
-    var config = new ConsumerConfig
-    {
-        BootstrapServers = kafkaSettings.BootstrapServers,
-        GroupId = "pharmacy-claims-worker-group",
-        AutoOffsetReset = AutoOffsetReset.Earliest,
-        EnableAutoCommit = false, // Manual commits for reliability
-        SessionTimeoutMs = 45000
-    };
-    return new ConsumerBuilder<Ignore, string>(config).Build();
-});
-
-
-// --- 3. HOSTED SERVICES ---
+// Hosted service stays here
 builder.Services.AddHostedService<ClaimWorker>();
 
-var host = builder.Build();
-host.Run();
+// Health checks stay here
+builder.Services.AddHealthChecks()
+    .AddRedis(
+        sp => sp.GetRequiredService<RedisSettings>().ConnectionString,
+        name: "redis")
+    .AddCheck("kafka", () =>
+    {
+        try
+        {
+            return HealthCheckResult.Healthy("Kafka client initialized");
+        }
+        catch (Exception ex)
+        {
+            return HealthCheckResult.Unhealthy("Kafka not healthy", ex);
+        }
+    });
+
+var app = builder.Build();
+
+app.MapHealthChecks("/health");
+
+app.Run();

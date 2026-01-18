@@ -4,5 +4,6 @@ public class KafkaSettings
 {
     public string BootstrapServers { get; set; } = default!;
     public string ClaimsTopic { get; set; } = "pharmacy-claims";
-    public int TimeoutSeconds { get; set; } = 15;
+    public string DlqTopic { get; set; } = "";
+    public int ClaimTimeoutSeconds { get; set; } = 15;
 }

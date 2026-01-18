@@ -1,0 +1,6 @@
+@EligibilityApi_HostAddress = http://localhost:5206
+
+GET {{EligibilityApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

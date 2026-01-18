@@ -1,130 +1,262 @@
-namespace AdjudicationWorker;
-
+using System.Diagnostics;
+using System.Text.Json;
 using Confluent.Kafka;
 using SharedContracts;
 using StackExchange.Redis;
-using System.Security.Claims;
-using System.Text.Json;
+
+namespace AdjudicationWorker;
 
 public class ClaimWorker(
+    ITaskOrchestrator taskOrchestrator,
     IConsumer<Ignore, string> consumer,
+    IProducer<Null, string> dlqProducer,
     IConnectionMultiplexer redis,
     RedisSettings redisSettings,
     KafkaSettings kafkaSettings,
+    ActivitySource activitySource,
     ILogger<ClaimWorker> logger) : BackgroundService
-{   
+{
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         consumer.Subscribe(kafkaSettings.ClaimsTopic);
-       
-        logger.LogInformation("Adjudication Worker Started...");
-        ClaimRequest? claim = null;
+        logger.LogInformation("Adjudication Worker started. Topic={Topic}", kafkaSettings.ClaimsTopic);
+
+        var db = redis.GetDatabase();
+        var pub = redis.GetSubscriber();
+
         try
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                ConsumeResult<Ignore, string>? consumeResult = null;
+
                 try
                 {
-                    var db = redis.GetDatabase();
-                    var sub = redis.GetSubscriber();
-
-                    // 1. Consume from Kafka
-                    var consumeResult = consumer.Consume(stoppingToken);
-                    claim = JsonSerializer.Deserialize<ClaimRequest>(consumeResult.Message.Value);
-
-                    if (claim == null) continue;
-
-                    logger.LogInformation($"Processing Claim: {claim.TransactionId}");
-                    var startTimeValue = await db.StringGetAsync($"claim_start:{claim.TransactionId}");
-
-                    if (startTimeValue.HasValue)
-                    {
-                        var startTime = (long)startTimeValue;
-                        var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-                        if (currentTime - startTime > redisSettings.MaxProcessingAgeSeconds)
-                        {
-                            logger.LogWarning("Bypassing stale claim {Id}. Age: {Age}s",
-                                claim.TransactionId, currentTime - startTime);
-
-                            // Cleanup and move to next message without processing
-                            await db.KeyDeleteAsync($"claim_start:{claim.TransactionId}");
-                            await sub.PublishAsync(RedisChannel.Literal(redisSettings.ResponseChannel), JsonSerializer.Serialize(new ClaimResponse
-                            {
-                                TransactionId = claim.TransactionId,
-                                NcpdpResponsePayload = $"REJECTED|{claim.NcpdpPayload}|TIMEOUT",
-                                Success = true
-                            }));
-                            consumer.Commit(consumeResult);
-                            continue;
-                        }
-                    }
-
-                    // 2. SIMULATE ADJUDICATION LOGIC (Pricing, DUR, etc.)
-                    var adjudicationResult = await ProcessClaimAsync(claim);// await Task.Delay(50); // Simulate 50ms processing time
-                    var responsePayload = $"PAID|{claim.NcpdpPayload}|APPROVED";
-
-                    // 3. Create Response
-                    var response = new ClaimResponse
-                    {
-                        TransactionId = claim.TransactionId,
-                        NcpdpResponsePayload = responsePayload,
-                        Success = true
-                    };
-
-                    // 4. Publish to Redis (The Broadcast)
-                   
-                    await sub.PublishAsync(RedisChannel.Literal(redisSettings.ResponseChannel), JsonSerializer.Serialize(response));
-                    consumer.Commit(consumeResult);
+                    consumeResult = consumer.Consume(stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, $"Error processing individual claim message: {claim?.TransactionId}.");
-                    // Optional: consumer.StoreOffset(consumeResult) or handle DLQ
+                    logger.LogError(ex, "Error consuming from Kafka");
+                    continue;
                 }
+
+                await ProcessMessageAsync(consumeResult, db, pub, stoppingToken);
             }
         }
-        catch (OperationCanceledException)
+        finally
         {
             consumer.Close();
-            logger.LogWarning($"Operation cancelled for claim message: {claim?.TransactionId}.");
         }
     }
 
-    public async Task<AdjudicationResult> ProcessClaimAsync(ClaimRequest claim)
+    private async Task ProcessMessageAsync(
+        ConsumeResult<Ignore, string> consumeResult,
+        IDatabase db,
+        ISubscriber pub,
+        CancellationToken workerToken)
     {
-        // 1. Start Service A and Service B in parallel
-        // We don't use 'await' here yet!
-        //Task<EligibilityResult> eligibilityTask = _eligibilityClient.CheckAsync(claim);
-        //Task<FormularyResult> formularyTask = _formularyClient.GetRulesAsync(claim);
+        ClaimRequest? claim = null;
 
-        //try
-        //{
-        //    // 2. Wait for both to complete
-        //    await Task.WhenAll(eligibilityTask, formularyTask);
+        using var activity = activitySource.StartActivity("ProcessClaim", ActivityKind.Consumer);
+        activity?.SetTag("messaging.system", "kafka");
+        activity?.SetTag("messaging.destination", kafkaSettings.ClaimsTopic);
+        activity?.SetTag("messaging.kafka.partition", consumeResult.Partition.Value);
+        activity?.SetTag("messaging.kafka.offset", consumeResult.Offset.Value);
 
-        //    // 3. Extract results (guaranteed to be finished)
-        //    var eligibility = await eligibilityTask;
-        //    var formulary = await formularyTask;
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(workerToken);
+        cts.CancelAfter(TimeSpan.FromSeconds(kafkaSettings.ClaimTimeoutSeconds));
+        var claimToken = cts.Token;
 
-        //    // 4. Conditional logic for Service C
-        //    if (eligibility.IsCovered && formulary.RequiresPriorAuth)
-        //    {
-        //        // Call the third service only if needed
-        //        var paResult = await _priorAuthClient.RequestAsync(claim, formulary.PaCriteria);
-        //        return ProcessFinalDecision(eligibility, formulary, paResult);
-        //    }
+        try
+        {
+            claim = DeserializeClaim(consumeResult.Message.Value, logger);
+            activity?.SetTag("claim.transaction_id", claim.TransactionId);
 
-        //}
-        //catch (Exception)
-        //{
-        //    if(eligibilityTask.IsFaulted) _logger.LogError("Eligibility Service Down");
-        //    if(formularyTask.IsFaulted) _logger.LogError("Formulary Service Down");
-        //    throw;
-        //}
+            logger.LogInformation("Processing Claim Id={Id}", claim.TransactionId);
 
-        //return ProcessFinalDecision(eligibility, formulary, null);
-        await Task.Delay(50000); // Simulate 50ms processing time
-        return new AdjudicationResult();
+            if (await IsStaleClaimAsync(db, claim))
+            {
+                await HandleStaleClaimAsync(db, pub, claim, consumeResult, workerToken);
+                return;
+            }
+
+            var response = await ProcessValidClaimAsync(claim, claimToken);
+            await PublishResponseWithRetryAsync(pub, response, workerToken);
+            consumer.Commit(consumeResult);
+        }
+        catch (OperationCanceledException) when (!workerToken.IsCancellationRequested)
+        {
+            logger.LogWarning("Claim timed out. Id={Id}", claim?.TransactionId);
+            await SendToDlqAsync(consumeResult.Message.Value, "ClaimTimeout", workerToken);
+            consumer.Commit(consumeResult);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error processing claim Id={Id}", claim?.TransactionId);
+
+            try
+            {
+                await SendToDlqAsync(consumeResult.Message.Value, "ProcessingError", workerToken);
+                consumer.Commit(consumeResult);
+            }
+            catch (Exception dlqEx)
+            {
+                logger.LogError(dlqEx, "Failed to send message to DLQ Id={Id}", claim?.TransactionId);
+            }
+        }
+    }
+
+    // ------------------------------------------------------------
+    // STRICT DESERIALIZATION WITH SINGLE-LINE LOGGING
+    // ------------------------------------------------------------
+    private ClaimRequest DeserializeClaim(string json, ILogger logger)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            logger.LogWarning("Received empty Kafka message payload");
+            throw new InvalidDataException("Kafka message payload is empty");
+        }
+
+        try
+        {
+            return JsonSerializer.Deserialize<ClaimRequest>(json)
+                   ?? throw new JsonException("Deserialized ClaimRequest is null");
+        }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Failed to deserialize ClaimRequest PayloadLength={Length} Preview={Preview}",
+                json.Length,
+                json.Length > 200 ? json[..200] + "..." : json);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error deserializing ClaimRequest PayloadLength={Length}", json.Length);
+            throw;
+        }
+    }
+
+    // ------------------------------------------------------------
+    // STALE CLAIM CHECK
+    // ------------------------------------------------------------
+    private async Task<bool> IsStaleClaimAsync(IDatabase db, ClaimRequest claim)
+    {
+        var key = $"claim_start:{claim.TransactionId}";
+        var startValue = await db.StringGetAsync(key);
+
+        if (!startValue.HasValue)
+            return false;
+
+        var startTime = (long)startValue;
+        var age = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - startTime;
+
+        if (age > redisSettings.MaxProcessingAgeSeconds)
+        {
+            logger.LogWarning("Stale claim detected Id={Id} AgeSeconds={Age}", claim.TransactionId, age);
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task HandleStaleClaimAsync(
+        IDatabase db,
+        ISubscriber pub,
+        ClaimRequest claim,
+        ConsumeResult<Ignore, string> consumeResult,
+        CancellationToken token)
+    {
+        var key = $"claim_start:{claim.TransactionId}";
+        await db.KeyDeleteAsync(key);
+
+        var response = new ClaimResponse
+        {
+            TransactionId = claim.TransactionId,
+            NcpdpResponsePayload = $"REJECTED|{claim.NcpdpPayload}|TIMEOUT",
+            Success = true
+        };
+
+        await PublishResponseWithRetryAsync(pub, response, token);
+        consumer.Commit(consumeResult);
+    }
+
+    // ------------------------------------------------------------
+    // VALID CLAIM PROCESSING
+    // ------------------------------------------------------------
+    private async Task<ClaimResponse> ProcessValidClaimAsync(ClaimRequest claim, CancellationToken token)
+    {
+        using var activity = activitySource.StartActivity("AdjudicateClaim", ActivityKind.Internal);
+        activity?.SetTag("claim.transaction_id", claim.TransactionId);
+
+        await taskOrchestrator.ProcessClaimRequestAsync(claim);
+        await Task.Delay(50, token);
+
+        return new ClaimResponse
+        {
+            TransactionId = claim.TransactionId,
+            NcpdpResponsePayload = $"PAID|{claim.NcpdpPayload}|APPROVED",
+            Success = true
+        };
+    }
+
+    // ------------------------------------------------------------
+    // REDIS PUBLISH WITH RETRY/BACKOFF
+    // ------------------------------------------------------------
+    private async Task PublishResponseWithRetryAsync(
+        ISubscriber pub,
+        ClaimResponse response,
+        CancellationToken token)
+    {
+        var json = JsonSerializer.Serialize(response);
+        var channel = RedisChannel.Literal(redisSettings.ResponseChannel);
+
+        const int maxAttempts = 5;
+        var delay = TimeSpan.FromMilliseconds(100);
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                await pub.PublishAsync(channel, json);
+                logger.LogInformation("Published response Id={Id} Attempt={Attempt}", response.TransactionId, attempt);
+                return;
+            }
+            catch (Exception ex) when (attempt < maxAttempts && !token.IsCancellationRequested)
+            {
+                logger.LogWarning(ex, "Redis publish failed Id={Id} Attempt={Attempt} DelayMs={Delay}",
+                    response.TransactionId, attempt, delay.TotalMilliseconds);
+
+                await Task.Delay(delay, token);
+                delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * 2);
+            }
+        }
+
+        logger.LogError("Redis publish exhausted retries Id={Id}", response.TransactionId);
+    }
+
+    // ------------------------------------------------------------
+    // KAFKA DLQ SUPPORT
+    // ------------------------------------------------------------
+    private async Task SendToDlqAsync(string originalPayload, string reason, CancellationToken token)
+    {
+        var dlqEnvelope = new
+        {
+            Reason = reason,
+            Timestamp = DateTimeOffset.UtcNow,
+            Payload = originalPayload
+        };
+
+        var json = JsonSerializer.Serialize(dlqEnvelope);
+
+        await dlqProducer.ProduceAsync(
+            kafkaSettings.DlqTopic,
+            new Message<Null, string> { Value = json },
+            token);
+
+        logger.LogWarning("Sent message to DLQ Reason={Reason}", reason);
     }
 }

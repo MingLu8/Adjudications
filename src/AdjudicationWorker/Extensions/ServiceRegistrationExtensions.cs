@@ -1,0 +1,78 @@
+﻿
+using AdjudicationWorker.ApiClients;
+using Confluent.Kafka;
+using Microsoft.Extensions.Options;
+using StackExchange.Redis;
+
+namespace AdjudicationWorker;
+
+public static class ServiceRegistrationExtensions
+{
+    public static IServiceCollection AddAdjudicationWorkerCore(
+        this IServiceCollection services,
+        IConfiguration config)
+    {
+        // Strongly typed settings
+        services.Configure<KafkaSettings>(config.GetSection("Kafka"));
+        services.Configure<RedisSettings>(config.GetSection("Redis"));
+
+        services.AddSingleton(sp => sp.GetRequiredService<IOptions<KafkaSettings>>().Value);
+        services.AddSingleton(sp => sp.GetRequiredService<IOptions<RedisSettings>>().Value);
+
+        // Core orchestrator + API caller
+        services.AddSingleton<ITaskOrchestrator, TaskOrchestrator>();
+        services.AddSingleton<IApiCaller, ApiCaller>();
+
+        // Typed API clients
+        services.AddTypedApiClient<EligibilityApiClient, IEligibilityApiClient, EligibilityApiSettings>(
+            config, "EligibilityApi");
+
+        services.AddTypedApiClient<CoverageApiClient, ICoverageApiClient, CoverageApiSettings>(
+            config, "CoverageApi");
+
+        services.AddTypedApiClient<PricingApiClient, IPricingApiClient, PricingApiSettings>(
+            config, "PricingApi");
+
+        // Redis
+        services.AddSingleton<IConnectionMultiplexer>(sp =>
+        {
+            var cfg = sp.GetRequiredService<RedisSettings>();
+            return ConnectionMultiplexer.Connect(cfg.ConnectionString);
+        });
+
+        // Kafka consumer
+        services.AddSingleton<IConsumer<Ignore, string>>(sp =>
+        {
+            var settings = sp.GetRequiredService<KafkaSettings>();
+
+            var consumerConfig = new ConsumerConfig
+            {
+                BootstrapServers = settings.BootstrapServers,
+                GroupId = "claim-worker",
+                AutoOffsetReset = AutoOffsetReset.Earliest,
+                EnableAutoCommit = false
+            };
+
+            return new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
+        });
+
+        // Kafka DLQ producer
+        services.AddSingleton<IProducer<Null, string>>(sp =>
+        {
+            var settings = sp.GetRequiredService<KafkaSettings>();
+
+            var producerConfig = new ProducerConfig
+            {
+                BootstrapServers = settings.BootstrapServers
+            };
+
+            return new ProducerBuilder<Null, string>(producerConfig).Build();
+        });
+
+        // OpenTelemetry ActivitySource
+        services.AddSingleton(new System.Diagnostics.ActivitySource("AdjudicationWorker"));
+
+        return services;
+    }
+}
+
