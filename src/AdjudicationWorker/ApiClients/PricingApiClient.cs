@@ -8,6 +8,8 @@
         public Task<PricingResponse> GetPricingAsync(
             PricingRequest request,
             CancellationToken token)
-            => apiCaller.PostAsync<PricingRequest, PricingResponse>(httpClient, "get", request, token);
+        {
+            return apiCaller.PostAsync<PricingRequest, PricingResponse>(httpClient, config.RouteTemplate.Replace("{endpoint}", "pricings"), request, token);
+        }
     }
 }

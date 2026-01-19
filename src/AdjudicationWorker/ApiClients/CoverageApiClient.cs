@@ -9,6 +9,8 @@
         public Task<CoverageResponse> GetCoverageAsync(
             CoverageRequest request,
             CancellationToken token)
-            => apiCaller.PostAsync<CoverageRequest, CoverageResponse>(httpClient, "get", request, token);
+        {
+            return apiCaller.PostAsync<CoverageRequest, CoverageResponse>(httpClient, config.RouteTemplate.Replace("{endpoint}", "coverages"), request, token);
+        }
     }
 }

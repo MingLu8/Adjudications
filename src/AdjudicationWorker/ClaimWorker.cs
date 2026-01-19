@@ -76,7 +76,7 @@ public class ClaimWorker(
             claim = DeserializeClaim(consumeResult.Message.Value, logger);
             activity?.SetTag("claim.transaction_id", claim.TransactionId);
 
-            logger.LogInformation("Processing Claim Id={Id}", claim.TransactionId);
+            logger.LogInformation("Processing Transaction Id={Id}", claim.TransactionId);
 
             if (await IsStaleClaimAsync(db, claim))
             {
@@ -90,13 +90,13 @@ public class ClaimWorker(
         }
         catch (OperationCanceledException) when (!workerToken.IsCancellationRequested)
         {
-            logger.LogWarning("Claim timed out. Id={Id}", claim?.TransactionId);
+            logger.LogWarning("Claim timed out. transaction Id={Id}", claim?.TransactionId);
             await SendToDlqAsync(consumeResult.Message.Value, "ClaimTimeout", workerToken);
             consumer.Commit(consumeResult);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing claim Id={Id}", claim?.TransactionId);
+            logger.LogError(ex, "Error processing transaction Id={Id}", claim?.TransactionId);
 
             try
             {
@@ -105,7 +105,7 @@ public class ClaimWorker(
             }
             catch (Exception dlqEx)
             {
-                logger.LogError(dlqEx, "Failed to send message to DLQ Id={Id}", claim?.TransactionId);
+                logger.LogError(dlqEx, "Failed to send message to DLQ transaction Id={Id}", claim?.TransactionId);
             }
         }
     }

@@ -1,8 +1,6 @@
 ﻿namespace SharedContracts;
-
-public class ClaimRequest
+public class ClaimRequest : RequestBase
 {
-    public string TransactionId { get; set; } = Guid.NewGuid().ToString();
     public string NcpdpPayload { get; set; } = string.Empty;
     public DateTime ReceivedAt { get; set; } = DateTime.UtcNow;
 }

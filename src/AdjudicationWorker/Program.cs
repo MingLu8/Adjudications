@@ -1,4 +1,5 @@
 using AdjudicationWorker;
+using AdjudicationWorker.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,7 +28,7 @@ builder.Services.AddHealthChecks()
     });
 
 var app = builder.Build();
-
+app.UseGlobalExceptionHandler();
 app.MapHealthChecks("/health");
 
 app.Run();

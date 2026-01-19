@@ -4,7 +4,7 @@ public static class PricingModule
 {
     public static void MapPricingEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/pricings", GetPricingAsync);
+        app.MapPost("api/v1/pricings", GetPricingAsync);
     }
 
     private static async Task GetPricingAsync(

@@ -9,6 +9,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddGatewayInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+app.UseGlobalExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

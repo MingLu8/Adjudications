@@ -13,9 +13,9 @@ public class TaskOrchestrator(
         using var cts = new CancellationTokenSource();
         var token = cts.Token;
 
-        var eligibilityTask = eligibilityApiClient.GetEligibilityAsync(new EligibilityRequest(), token);
-        var coverageTask = coverageApiClient.GetCoverageAsync(new CoverageRequest(), token);
-        var pricingTask = pricingApiClient.GetPricingAsync(new PricingRequest(), token);
+        var eligibilityTask = eligibilityApiClient.GetEligibilityAsync(new EligibilityRequest(request.TransactionId), token);
+        var coverageTask = coverageApiClient.GetCoverageAsync(new CoverageRequest(request.TransactionId), token);
+        var pricingTask = pricingApiClient.GetPricingAsync(new PricingRequest(request.TransactionId), token);
 
         var tasks = new List<Task> { eligibilityTask, coverageTask, pricingTask };
 
