@@ -1,6 +1,7 @@
 ﻿
 using AdjudicationWorker.ApiClients;
 using Confluent.Kafka;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
@@ -24,14 +25,13 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<IApiCaller, ApiCaller>();
 
         // Typed API clients
-        services.AddTypedApiClient<EligibilityApiClient, IEligibilityApiClient, EligibilityApiSettings>(
-            config, "EligibilityApi");
+        services.AddTypedApiClient<EligibilityApiClient, IEligibilityApiClient, EligibilityApiSettings>(config, "EligibilityApi");
 
-        services.AddTypedApiClient<CoverageApiClient, ICoverageApiClient, CoverageApiSettings>(
-            config, "CoverageApi");
+        services.AddTypedApiClient<CoverageApiClient, ICoverageApiClient, CoverageApiSettings>(config, "CoverageApi");
 
-        services.AddTypedApiClient<PricingApiClient, IPricingApiClient, PricingApiSettings>(
-            config, "PricingApi");
+        services.AddTypedApiClient<PricingApiClient, IPricingApiClient, PricingApiSettings>(config, "PricingApi");
+
+        services.AddSingleton<IFormularyApiClient, FormularyApiClient>();
 
         // Redis
         services.AddSingleton<IConnectionMultiplexer>(sp =>

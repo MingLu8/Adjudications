@@ -1,4 +1,5 @@
-﻿
+﻿using SharedContracts;
+
 namespace AdjudicationWorker.ApiClients
 {
     public interface ICoverageApiClient

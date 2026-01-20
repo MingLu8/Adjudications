@@ -1,4 +1,6 @@
-﻿namespace AdjudicationWorker.ApiClients
+﻿using SharedContracts;
+
+namespace AdjudicationWorker.ApiClients
 {
     public class PricingApiClient(
         HttpClient httpClient,

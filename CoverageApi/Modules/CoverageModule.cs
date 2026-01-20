@@ -1,5 +1,6 @@
 ﻿using AdjudicationWorker.ApiClients;
 using Microsoft.AspNetCore.Mvc;
+using SharedContracts;
 
 namespace CoverageApi.Modules;
 
@@ -10,13 +11,14 @@ public static class CoverageModule
         app.MapPost("api/v1/coverages", GetCoverageAsync);
     }
 
-    private static async Task GetCoverageAsync(
+    private static Task<CoverageResponse> GetCoverageAsync(
         [FromBody] CoverageRequest coverageRequest,
         HttpContext context,
         ILoggerFactory loggerFactory,
         CancellationToken token
         )
     {
-        throw new NotImplementedException();
+        Task.Delay(10, token).Wait(token);
+        return Task.FromResult(new CoverageResponse());
     }
 }

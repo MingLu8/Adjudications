@@ -1,4 +1,4 @@
-﻿namespace AdjudicationWorker.ApiClients
+﻿namespace SharedContracts
 {
     public class CoverageResponse
     {

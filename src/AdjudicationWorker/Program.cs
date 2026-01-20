@@ -1,12 +1,16 @@
 using AdjudicationWorker;
 using AdjudicationWorker.Extensions;
+using FormularyApi;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Core worker dependencies (Kafka, Redis, typed clients, orchestrator, API caller, ActivitySource)
 builder.Services.AddAdjudicationWorkerCore(builder.Configuration);
-
+builder.Services.AddGrpcClient<Greeter.GreeterClient>(o =>
+{
+    o.Address = new Uri("https://localhost:7027/api/v1");
+});
 // Hosted service stays here
 builder.Services.AddHostedService<ClaimWorker>();
 

@@ -12,9 +12,9 @@ public class ClaimGatewayService(
     KafkaSettings settings,
     ILogger<ClaimGatewayService> logger)
 {
-    public async Task<string> ProcessAsync(string ncpdpPayload, CancellationToken userToken)
+    public async Task<ClaimResponse> ProcessAsync(string transactionId, string ncpdpPayload, CancellationToken userToken)
     {
-        var claim = new ClaimRequest { NcpdpPayload = ncpdpPayload };
+        var claim = new ClaimRequest(transactionId) { NcpdpPayload = ncpdpPayload };
         var tcs = responseMap.Create(claim.TransactionId);
 
         using var timeoutSource = new CancellationTokenSource(TimeSpan.FromSeconds(settings.TimeoutSeconds));
@@ -34,7 +34,7 @@ public class ClaimGatewayService(
             // Wait for the bridge service to resolve the TCS
             var response = await tcs.Task.WaitAsync(linkedSource.Token);
 
-            return response.NcpdpResponsePayload;
+            return response;
         }
         catch (OperationCanceledException ex)
         {

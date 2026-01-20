@@ -1,4 +1,6 @@
-﻿namespace PricingApi.Modules;
+﻿using SharedContracts;
+
+namespace PricingApi.Modules;
 
 public static class PricingModule
 {
@@ -7,12 +9,13 @@ public static class PricingModule
         app.MapPost("api/v1/pricings", GetPricingAsync);
     }
 
-    private static async Task GetPricingAsync(
+    private static Task<PricingResponse> GetPricingAsync(
         HttpContext context,
         ILoggerFactory loggerFactory,
         CancellationToken token
         )
     {
-        throw new NotImplementedException();
+        Task.Delay(10, token).Wait(token);
+        return Task.FromResult(new PricingResponse());
     }
 }

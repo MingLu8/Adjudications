@@ -1,8 +1,9 @@
-using System.Diagnostics;
-using System.Text.Json;
 using Confluent.Kafka;
+using Grpc.Core;
 using SharedContracts;
 using StackExchange.Redis;
+using System.Diagnostics;
+using System.Text.Json;
 
 namespace AdjudicationWorker;
 
@@ -192,14 +193,15 @@ public class ClaimWorker(
         using var activity = activitySource.StartActivity("AdjudicateClaim", ActivityKind.Internal);
         activity?.SetTag("claim.transaction_id", claim.TransactionId);
 
-        await taskOrchestrator.ProcessClaimRequestAsync(claim);
+        var orchestrationResult = await taskOrchestrator.ProcessClaimRequestAsync(claim);
         await Task.Delay(50, token);
 
         return new ClaimResponse
         {
             TransactionId = claim.TransactionId,
             NcpdpResponsePayload = $"PAID|{claim.NcpdpPayload}|APPROVED",
-            Success = true
+            Success = true,
+            OrchestrationResult = orchestrationResult
         };
     }
 
