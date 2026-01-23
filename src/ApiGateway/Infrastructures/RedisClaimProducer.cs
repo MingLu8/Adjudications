@@ -17,11 +17,11 @@ namespace ApiGateway.Infrastructures
                 logger.LogInformation($"Queuing claim request: {claim.TransactionId}.");
 
                 var db = redis.GetDatabase();
-                await db.StreamAddAsync("pharmacy-claims",
+                await db.StreamAddAsync(settings.RequestTopic,
                 [
-                    new("TransactionId", claim.TransactionId),
-                    new("Payload", claim.NcpdpPayload),
-                    new("StartedAt", claim.ReceivedAt) // Record the exact start time
+                    new(nameof(claim.TransactionId), claim.TransactionId),
+                    new(nameof(claim.NcpdpPayload), claim.NcpdpPayload),
+                    new(nameof(claim.ReceivedAt), claim.ReceivedAt) // Record the exact start time
                 ],
                 maxLength: settings.StreamLimit,
                 useApproximateMaxLength: true);

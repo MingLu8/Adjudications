@@ -2,7 +2,7 @@
 namespace AdjudicationWorker
 {
     [Serializable]
-    internal class StaleMessageException : Exception
+    internal class StaleMessageException : ConsumerMessageException
     {
 
         public StaleMessageException()

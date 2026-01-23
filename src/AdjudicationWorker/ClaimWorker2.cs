@@ -12,14 +12,16 @@ public class ClaimWorker2(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Adjudication Worker started.");
-
+        await consumer.EnsureConsumerGroupExistsAsync();
         while (!stoppingToken.IsCancellationRequested)
         {
-            ClaimRequest claimRequest;
+            ClaimRequest? claimRequest;
 
             try
             {
-                claimRequest = await consumer.ConsumeAsync(stoppingToken);   
+                claimRequest = await consumer.ConsumeAsync(stoppingToken);
+                if (claimRequest == null) continue;
+
                 var response = await ProcessMessageAsync(claimRequest, stoppingToken);
 
                 if (string.IsNullOrEmpty(claimRequest.NcpdpPayload))
@@ -29,15 +31,7 @@ public class ClaimWorker2(
                     continue;
                 }
                 await claimResponsePublisher.PublishResponseAsync(response, stoppingToken);
-            }
-            catch(NullMessageLengthException)
-            {
-            }
-            catch (StaleMessageException ex)
-            {
-                logger.LogWarning($"Stale claim detected TransactionId={ex.TransactionId} AgeSeconds={ex.AgeSeconds}");
-                await claimResponsePublisher.PublishResponseAsync(new ClaimResponse { Status = "Staled message", TransactionId = ex.TransactionId}, stoppingToken);
-            }
+            }          
             catch (OperationCanceledException)
             {
                 break;
@@ -45,7 +39,7 @@ public class ClaimWorker2(
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error consuming message.");
-            } 
+            }           
         }
     }
 

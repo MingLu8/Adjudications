@@ -2,7 +2,7 @@
 namespace AdjudicationWorker
 {
     [Serializable]
-    internal class NullMessageLengthException : Exception
+    internal class NullMessageLengthException : ConsumerMessageException
     {
         public NullMessageLengthException()
         {
