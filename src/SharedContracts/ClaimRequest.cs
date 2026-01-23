@@ -1,16 +1,17 @@
 ﻿namespace SharedContracts;
+
 public class ClaimRequest : RequestBase
 {
-    public ClaimRequest()
+    public ClaimRequest() : base(string.Empty)
     {
         
     }
-    public ClaimRequest(string transactionId)
+    public ClaimRequest(string transactionId, string ncpdpPayload, long receivedAt) : base(transactionId)
     {
-        TransactionId = transactionId;
+        NcpdpPayload = ncpdpPayload;
+        ReceivedAt = receivedAt;
     }
 
     public string NcpdpPayload { get; set; } = string.Empty;
-    public DateTime ReceivedAt { get; set; } = DateTime.UtcNow;
-    public string PricingResponse { get; }
+    public long ReceivedAt { get; }
 }

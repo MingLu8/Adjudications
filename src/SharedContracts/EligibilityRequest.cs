@@ -1,18 +1,18 @@
 ﻿using SharedContracts;
+using System.Security.Claims;
 
 namespace AdjudicationWorker.ApiClients
 {
     public class EligibilityRequest : RequestBase
     {
-        public EligibilityRequest()
+        public EligibilityRequest() : base(string.Empty)
         {
             
         }
-        public EligibilityRequest(string transactionId)
+        public EligibilityRequest(string transactionId, NCPDPClaim claim) : base(transactionId)
         {
-            TransactionId = transactionId;
-        }
-
+            
+        }       
         public string Bin { get; set; } = string.Empty;
         public string Pcn { get; set; } = string.Empty;
         public string GroupId { get; set; } = string.Empty;

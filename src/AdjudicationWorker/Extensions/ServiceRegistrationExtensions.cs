@@ -1,10 +1,7 @@
 ﻿
 using AdjudicationWorker.ApiClients;
-using Confluent.Kafka;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-
 namespace AdjudicationWorker;
 
 public static class ServiceRegistrationExtensions
@@ -14,15 +11,16 @@ public static class ServiceRegistrationExtensions
         IConfiguration config)
     {
         // Strongly typed settings
-        services.Configure<KafkaSettings>(config.GetSection("Kafka"));
-        services.Configure<RedisSettings>(config.GetSection("Redis"));
-
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<KafkaSettings>>().Value);
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<RedisSettings>>().Value);
+        services.AddAppSettings<KafkaSettings>(config, "Kafka");
+        services.AddAppSettings<RedisSettings>(config, "Redis");
+        services.AddAppSettings<WorkerSettings>(config, "Worker");
 
         // Core orchestrator + API caller
         services.AddSingleton<ITaskOrchestrator, TaskOrchestrator>();
         services.AddSingleton<IApiCaller, ApiCaller>();
+        services.AddSingleton<IClaimConsumer, RedisClaimConsumer>();
+        services.AddSingleton<IClaimResponsePublisher, RedisClaimResponsePublisher>();
+        services.AddSingleton<INcpdpClaimParser, NcpdpClaimParser>();
 
         // Typed API clients
         services.AddTypedApiClient<EligibilityApiClient, IEligibilityApiClient, EligibilityApiSettings>(config, "EligibilityApi");
@@ -41,37 +39,46 @@ public static class ServiceRegistrationExtensions
         });
 
         // Kafka consumer
-        services.AddSingleton<IConsumer<Ignore, string>>(sp =>
-        {
-            var settings = sp.GetRequiredService<KafkaSettings>();
+        //services.AddSingleton<IConsumer<Ignore, string>>(sp =>
+        //{
+        //    var settings = sp.GetRequiredService<KafkaSettings>();
 
-            var consumerConfig = new ConsumerConfig
-            {
-                BootstrapServers = settings.BootstrapServers,
-                GroupId = "claim-worker",
-                AutoOffsetReset = AutoOffsetReset.Earliest,
-                EnableAutoCommit = false
-            };
+        //    var consumerConfig = new ConsumerConfig
+        //    {
+        //        BootstrapServers = settings.BootstrapServers,
+        //        GroupId = "claim-worker",
+        //        AutoOffsetReset = AutoOffsetReset.Earliest,
+        //        EnableAutoCommit = false
+        //    };
 
-            return new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
-        });
+        //    return new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
+        //});
 
-        // Kafka DLQ producer
-        services.AddSingleton<IProducer<Null, string>>(sp =>
-        {
-            var settings = sp.GetRequiredService<KafkaSettings>();
+        //// Kafka DLQ producer
+        //services.AddSingleton<IProducer<Null, string>>(sp =>
+        //{
+        //    var settings = sp.GetRequiredService<KafkaSettings>();
 
-            var producerConfig = new ProducerConfig
-            {
-                BootstrapServers = settings.BootstrapServers
-            };
+        //    var producerConfig = new ProducerConfig
+        //    {
+        //        BootstrapServers = settings.BootstrapServers
+        //    };
 
-            return new ProducerBuilder<Null, string>(producerConfig).Build();
-        });
+        //    return new ProducerBuilder<Null, string>(producerConfig).Build();
+        //});
 
-        // OpenTelemetry ActivitySource
-        services.AddSingleton(new System.Diagnostics.ActivitySource("AdjudicationWorker"));
+        //// OpenTelemetry ActivitySource
+        //services.AddSingleton(new System.Diagnostics.ActivitySource("AdjudicationWorker"));
 
+        return services;
+    }
+
+    public static IServiceCollection AddAppSettings<T>(
+     this IServiceCollection services,
+     IConfiguration config, string sectionName) where T : class
+    {
+        services.Configure<T>(config.GetSection(sectionName));
+        services.AddSingleton(sp => sp.GetRequiredService<IOptions<T>>().Value);
         return services;
     }
 }

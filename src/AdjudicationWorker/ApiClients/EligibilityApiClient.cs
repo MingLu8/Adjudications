@@ -14,7 +14,6 @@ namespace AdjudicationWorker.ApiClients
             EligibilityRequest request,
             CancellationToken token)
         {
-
             return apiCaller.PostAsync<EligibilityRequest, EligibilityResponse>(httpClient, config.RouteTemplate.Replace("{endpoint}", "eligibilities"), request, token);
         }
     }

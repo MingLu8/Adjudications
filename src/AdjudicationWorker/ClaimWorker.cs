@@ -12,8 +12,10 @@ public class ClaimWorker(
     IConsumer<Ignore, string> consumer,
     IProducer<Null, string> dlqProducer,
     IConnectionMultiplexer redis,
+    INcpdpClaimParser ncpdpClaimParser,
     RedisSettings redisSettings,
     KafkaSettings kafkaSettings,
+    WorkerSettings workerSettings,
     ActivitySource activitySource,
     ILogger<ClaimWorker> logger) : BackgroundService
 {
@@ -69,7 +71,7 @@ public class ClaimWorker(
         activity?.SetTag("messaging.kafka.offset", consumeResult.Offset.Value);
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(workerToken);
-        cts.CancelAfter(TimeSpan.FromSeconds(kafkaSettings.ClaimTimeoutSeconds));
+        cts.CancelAfter(TimeSpan.FromSeconds(workerSettings.ClaimTimeoutSeconds));
         var claimToken = cts.Token;
 
         try
@@ -188,18 +190,19 @@ public class ClaimWorker(
     // ------------------------------------------------------------
     // VALID CLAIM PROCESSING
     // ------------------------------------------------------------
-    private async Task<ClaimResponse> ProcessValidClaimAsync(ClaimRequest claim, CancellationToken token)
+    private async Task<ClaimResponse> ProcessValidClaimAsync(ClaimRequest claimRequest, CancellationToken token)
     {
         using var activity = activitySource.StartActivity("AdjudicateClaim", ActivityKind.Internal);
-        activity?.SetTag("claim.transaction_id", claim.TransactionId);
+        activity?.SetTag("claim.transaction_id", claimRequest.TransactionId);
 
-        var orchestrationResult = await taskOrchestrator.ProcessClaimRequestAsync(claim);
+        var claim = ncpdpClaimParser.Parse(claimRequest.NcpdpPayload);
+        var orchestrationResult = await taskOrchestrator.ProcessClaimRequestAsync(claimRequest.TransactionId, claim);
         await Task.Delay(50, token);
 
         return new ClaimResponse
         {
-            TransactionId = claim.TransactionId,
-            NcpdpResponsePayload = $"PAID|{claim.NcpdpPayload}|APPROVED",
+            TransactionId = claimRequest.TransactionId,
+            NcpdpResponsePayload = $"PAID|{claimRequest.NcpdpPayload}|APPROVED",
             Success = true,
             OrchestrationResult = orchestrationResult
         };

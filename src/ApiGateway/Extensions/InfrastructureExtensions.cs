@@ -11,10 +11,9 @@ public static class InfrastructureExtensions
 {
     public static IServiceCollection AddGatewayInfrastructure(this IServiceCollection services, IConfiguration config)
     {
-        services.Configure<KafkaSettings>(config.GetSection("Kafka")); 
-        services.Configure<RedisSettings>(config.GetSection("Redis")); 
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<KafkaSettings>>().Value); 
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<RedisSettings>>().Value); 
+        services.AddAppSettings<KafkaSettings>(config, "Kafka");
+        services.AddAppSettings<RedisSettings>(config, "Redis");
+
         services.AddSingleton<IConnectionMultiplexer>(sp => 
         { 
             var cfg = sp.GetRequiredService<RedisSettings>();
@@ -26,10 +25,20 @@ public static class InfrastructureExtensions
             return new ProducerBuilder<Null, string>(new ProducerConfig { BootstrapServers = cfg.BootstrapServers }).Build();
         }); 
         services.AddSingleton<IResponseMap, ResponseMap>(); 
-        services.AddSingleton<IKafkaProducerService, KafkaProducerService>(); 
+       // services.AddSingleton<IClaimProducer, KafkaClaimProducer>(); 
+        services.AddSingleton<IClaimProducer, RedisClaimProducer>(); 
         services.AddSingleton<ClaimGatewayService>(); 
         services.AddHostedService<EgressBridgeService>();
 
+        return services;
+    }
+
+    public static IServiceCollection AddAppSettings<T>(
+    this IServiceCollection services,
+    IConfiguration config, string sectionName) where T : class
+    {
+        services.Configure<T>(config.GetSection(sectionName));
+        services.AddSingleton(sp => sp.GetRequiredService<IOptions<T>>().Value);
         return services;
     }
 }

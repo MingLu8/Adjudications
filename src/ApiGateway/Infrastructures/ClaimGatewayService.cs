@@ -3,35 +3,24 @@
 using ApiGateway.Abstractions;
 using ApiGateway.ConfigurationSettings;
 using SharedContracts;
-using StackExchange.Redis;
 
 public class ClaimGatewayService(
-    IKafkaProducerService producer,
-    IConnectionMultiplexer redis,
+    IClaimProducer producer,
     IResponseMap responseMap,
     KafkaSettings settings,
     ILogger<ClaimGatewayService> logger)
 {
     public async Task<ClaimResponse> ProcessAsync(string transactionId, string ncpdpPayload, CancellationToken userToken)
     {
-        var claim = new ClaimRequest(transactionId) { NcpdpPayload = ncpdpPayload };
+        var claim = new ClaimRequest(transactionId, ncpdpPayload, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         var tcs = responseMap.Create(claim.TransactionId);
 
         using var timeoutSource = new CancellationTokenSource(TimeSpan.FromSeconds(settings.TimeoutSeconds));
         using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(userToken, timeoutSource.Token);
 
         try
-        {
-            var db = redis.GetDatabase();
-            var startTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-            // Store the start time; expire the key after 5 minutes (safety margin)
-            await db.StringSetAsync($"claim_start:{claim.TransactionId}", startTime, TimeSpan.FromMinutes(5));
-
-            // Propagate the linked token to the producer
-            await producer.SendAsync(claim, linkedSource.Token);
-           
-            // Wait for the bridge service to resolve the TCS
+        {            
+            await producer.ProduceAsync(claim, linkedSource.Token);
             var response = await tcs.Task.WaitAsync(linkedSource.Token);
 
             return response;

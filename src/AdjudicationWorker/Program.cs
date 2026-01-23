@@ -12,7 +12,7 @@ builder.Services.AddGrpcClient<Greeter.GreeterClient>(o =>
     o.Address = new Uri("https://localhost:7027/api/v1");
 });
 // Hosted service stays here
-builder.Services.AddHostedService<ClaimWorker>();
+builder.Services.AddHostedService<ClaimWorker2>();
 
 // Health checks stay here
 builder.Services.AddHealthChecks()

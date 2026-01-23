@@ -1,4 +1,5 @@
 ﻿using ApiGateway.Infrastructures;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ApiGateway.Modules;
 
@@ -13,17 +14,18 @@ public static class ClaimsModule
     }
 
     private static async Task<IResult> AdjudicateClaim(
-    HttpContext ctx,
-    ClaimGatewayService gateway,
-    ILoggerFactory loggerFactory,
-    CancellationToken token)
+        [FromBody] string ncpdp,
+        HttpContext ctx,
+        ClaimGatewayService gateway,
+        ILoggerFactory loggerFactory,
+        CancellationToken token)
     {
         var logger = loggerFactory.CreateLogger("ClaimsModule");
         var remoteIp = ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var transationId = Guid.NewGuid().ToString();
         logger.LogInformation("Adjudicate request received RemoteIp={RemoteIp}, TransactionId={transationId}", remoteIp, transationId);
 
-        var ncpdp = await ReadRequestBodyAsync(ctx, logger);
+        //var ncpdp = await ReadRequestBodyAsync(ctx, logger);
         if (ncpdp is null)
             return Results.StatusCode(400);
 

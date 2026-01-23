@@ -11,16 +11,16 @@ public class TaskOrchestrator(
     IPricingApiClient pricingApiClient,
     IFormularyApiClient formularyApiClient) : ITaskOrchestrator
 {
-    public async Task<OrchestrationResult> ProcessClaimRequestAsync(ClaimRequest request)
+    public async Task<OrchestrationResult> ProcessClaimRequestAsync(string transactionId, NCPDPClaim claim)
     {
         using var cts = new CancellationTokenSource();
         var token = cts.Token;
 
-        var eligibilityTask = TimeAsync(() => eligibilityApiClient.GetEligibilityAsync(new EligibilityRequest(request.TransactionId), token));
+        var eligibilityTask = TimeAsync(() => eligibilityApiClient.GetEligibilityAsync(new EligibilityRequest(transactionId, claim), token));
 
-        var coverageTask = TimeAsync(() => coverageApiClient.GetCoverageAsync(new CoverageRequest(request.TransactionId), token));
+        var coverageTask = TimeAsync(() => coverageApiClient.GetCoverageAsync(new CoverageRequest(transactionId, claim), token));
 
-        var pricingTask = TimeAsync(() => pricingApiClient.GetPricingAsync(new PricingRequest(request.TransactionId), token));
+        var pricingTask = TimeAsync(() => pricingApiClient.GetPricingAsync(new PricingRequest(transactionId, claim), token));
 
         var formularyTask = TimeAsync(() => formularyApiClient.GetFormularyAsync(new HelloRequest { Name = "AdjudicationWorker" }, token));
 
@@ -53,7 +53,7 @@ public class TaskOrchestrator(
         var formulary = await formularyTask;
 
         return new OrchestrationResult(
-            request,
+            claim,
             eligibility.Result,
             coverage.Result,
             pricing.Result,

@@ -2,5 +2,9 @@
 
 public class RequestBase
 {
-    public string TransactionId { get; set; } = Guid.NewGuid().ToString();
+    public RequestBase(string transactionId)
+    {
+        TransactionId = transactionId;
+    }
+    public string TransactionId { get; }
 }

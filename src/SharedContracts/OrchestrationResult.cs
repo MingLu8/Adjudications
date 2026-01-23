@@ -5,7 +5,7 @@ namespace SharedContracts;
 public class OrchestrationResult
 {   
     public OrchestrationResult(
-        ClaimRequest request,
+        NCPDPClaim claim,
         EligibilityResponse eligibilityResult,
         CoverageResponse coverageResult,
         PricingResponse pricingResult,
@@ -16,7 +16,7 @@ public class OrchestrationResult
         long formularyTime
         )
     {
-        Request = request;
+        Claim = claim;
         EligibilityResult = eligibilityResult;
         CoverageResult = coverageResult;
         PricingResult = pricingResult;
@@ -27,7 +27,7 @@ public class OrchestrationResult
         FormularyTime = formularyTime;
     }
 
-    public ClaimRequest Request { get; }
+    public NCPDPClaim Claim { get; }
     public EligibilityResponse EligibilityResult { get; }
     public CoverageResponse CoverageResult { get; }
     public PricingResponse PricingResult { get; }
