@@ -13,6 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedContracts", "src\Shar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D0CDA06B-2D07-498D-B4A9-9E03345C6DC0}"
 	ProjectSection(SolutionItems) = preProject
+		alabama_aac.sql = alabama_aac.sql
 		docker-compose.yml = docker-compose.yml
 		keda-scaler.yaml = keda-scaler.yaml
 		start-worker.bat = start-worker.bat
@@ -33,6 +34,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdjudicationEngine.AppHost", "AdjudicationEngine.AppHost\AdjudicationEngine.AppHost.csproj", "{47913C80-2DDD-4028-BBF5-1BC73A96251B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdjudicationEngine.ServiceDefaults", "AdjudicationEngine.ServiceDefaults\AdjudicationEngine.ServiceDefaults.csproj", "{D1D174B6-EA71-7154-7DB5-D8673475C974}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AacApi", "src\AacApi\AacApi.csproj", "{5894D629-1124-4923-9AF2-96AB5BE1F4B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -164,6 +167,18 @@ Global
 		{D1D174B6-EA71-7154-7DB5-D8673475C974}.Release|x64.Build.0 = Release|Any CPU
 		{D1D174B6-EA71-7154-7DB5-D8673475C974}.Release|x86.ActiveCfg = Release|Any CPU
 		{D1D174B6-EA71-7154-7DB5-D8673475C974}.Release|x86.Build.0 = Release|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Debug|x64.Build.0 = Debug|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Debug|x86.Build.0 = Debug|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Release|x64.ActiveCfg = Release|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Release|x64.Build.0 = Release|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Release|x86.ActiveCfg = Release|Any CPU
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -177,6 +192,7 @@ Global
 		{E6F002E6-7234-405A-A018-C1A9C0146F85} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{29AB0E24-9514-4A22-9175-8A916E9BA091} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B92E08B9-F04F-3C05-E23C-5B96A09996E2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{5894D629-1124-4923-9AF2-96AB5BE1F4B1} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {35213428-7931-4BA6-928B-55C88228E5ED}
