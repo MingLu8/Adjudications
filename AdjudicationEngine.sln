@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 		keda-scaler.yaml = keda-scaler.yaml
 		start-worker.bat = start-worker.bat
+		update-shared-contacts-package.ps1 = update-shared-contacts-package.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9D4F7F6C-7D1B-4EA2-B267-8335FE0E2E69}"

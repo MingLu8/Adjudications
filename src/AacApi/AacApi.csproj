@@ -1,5 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -7,24 +6,25 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <PublishAot>false</PublishAot>
     <UserSecretsId>74960fb7-1c96-4582-a3fc-2aa3d63204e3</UserSecretsId>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeHttpRuleProtos>true</IncludeHttpRuleProtos>
   </PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="ClosedXML" Version="0.105.0" />
-		<PackageReference Include="CsvHelper" Version="33.1.0" />
-		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.76.0" />
-		<PackageReference Include="Grpc.AspNetCore" Version="2.76.0" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
-		<PackageReference Include="Scalar.AspNetCore" Version="2.12.20" />
-		<PackageReference Include="Microsoft.AspNetCore.Grpc.JsonTranscoding" Version="10.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
-		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
-		<PackageReference Include="RepoDb" Version="1.13.1" />
-		<PackageReference Include="RepoDb.SqlServer" Version="1.13.1" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.2" />
-		<PackageReference Include="RepoDb.SqlServer.BulkOperations" Version="1.13.1" />
-		<PackageReference Include="SharedContracts" Version="1.0.5" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
+    <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.76.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.76.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.12.20" />
+    <PackageReference Include="Microsoft.AspNetCore.Grpc.JsonTranscoding" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+    <PackageReference Include="RepoDb" Version="1.13.1" />
+    <PackageReference Include="RepoDb.SqlServer" Version="1.13.1" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.2" />
+    <PackageReference Include="RepoDb.SqlServer.BulkOperations" Version="1.13.1" />
+    <PackageReference Include="SharedContracts" Version="1.0.0-pre.202601281117" GeneratePathProperty="true" />
+    <Protobuf Include="$(PkgSharedContracts)\content\protos\aac.proto" AdditionalImportDirs="$(PkgSharedContracts)\content\protos" ProtoRoot="$(PkgSharedContracts)\content\protos" GrpcServices="Both" />
+  </ItemGroup>
 </Project>

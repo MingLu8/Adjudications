@@ -21,5 +21,21 @@ namespace AacApi.AppServices
                 IsActive = aac.IsActive,
             };
         }
+
+        public override async Task<AacResponse> PostAac(AacRequest request, ServerCallContext context)
+        {
+            var aac = await aacRepository.GetByStateAndNdcAsync(request.State, request.Ndc);
+            return new AacResponse
+            {
+                State = aac.State,
+                Ndc = aac.Ndc,
+                Price = aac.Price.ToProtoDecimal(),
+                Id = aac.Id.ToString(),
+                EffectiveDate = aac.EffectiveDate.ToProtoDate(),
+                CreatedDate = aac.CreatedDate.ToProtoDateTime(),
+                UpdatedDate = aac.UpdatedDate.ToProtoDateTime(),
+                IsActive = aac.IsActive,
+            };
+        }
     }
 }

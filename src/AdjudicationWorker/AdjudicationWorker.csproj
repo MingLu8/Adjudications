@@ -1,34 +1,28 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-AdjudicationWorker-584e12cb-8f27-475d-a1c8-da0503e20de9</UserSecretsId>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="Protos\**" />
     <Content Remove="Protos\**" />
     <EmbeddedResource Remove="Protos\**" />
     <None Remove="Protos\**" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
     <PackageReference Include="Confluent.Kafka" Version="2.13.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.3.9" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
-    <PackageReference Include="SharedContracts" Version="1.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.10.1" />
   </ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.76.0" />
-		<PackageReference Include="Google.Protobuf" Version="3.33.4" />
-		<PackageReference Include="Grpc.Tools" Version="2.76.0" PrivateAssets="All" />
-	</ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharedContracts\SharedContracts.csproj" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.76.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.33.4" />
+    <PackageReference Include="Grpc.Tools" Version="2.76.0" PrivateAssets="All" />
+    <PackageReference Include="SharedContracts" Version="1.0.0-pre.202601281117" GeneratePathProperty="true" />
   </ItemGroup>
 </Project>

@@ -1,3 +1,4 @@
+using AacApi;
 using FormularyApi;
 
 namespace SharedContracts;
@@ -32,6 +33,7 @@ public class OrchestrationResult
     public CoverageResponse CoverageResult { get; }
     public PricingResponse PricingResult { get; }
     public HelloReply FormularyResult { get; }
+    public AacResponse AacResponse { get; }
     public long EligibilityTime { get; }
     public long CoverageTime { get; }
     public long PricingTime { get; }

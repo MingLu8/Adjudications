@@ -4,9 +4,17 @@ option csharp_namespace = "AacApi";
 
 package aac;
 
-
+import "google/api/annotations.proto";
 service AacService {
-  rpc GetAac (AacRequest) returns (AacResponse);
+  rpc GetAac (AacRequest) returns (AacResponse) {
+    option (google.api.http) = { get: "/v1/aac" }; 
+  }
+  rpc PostAac (AacRequest) returns (AacResponse) {
+    option (google.api.http) = {
+      post: "/v1/aac"
+      body: "*"
+    }; 
+  }
 }
 
 message AacRequest {

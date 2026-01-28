@@ -9,7 +9,7 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 // 1. Add gRPC with Transcoding
-builder.Services.AddGrpc();//.AddJsonTranscoding();
+builder.Services.AddGrpc().AddJsonTranscoding();
 builder.Services.AddGrpcReflection();
 
 // 2. Add gRPC Swagger Integration
