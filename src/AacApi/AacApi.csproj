@@ -14,6 +14,7 @@
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.76.0" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.76.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Grpc.Swagger" Version="0.10.2" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.12.20" />
     <PackageReference Include="Microsoft.AspNetCore.Grpc.JsonTranscoding" Version="10.0.2" />
@@ -25,6 +26,7 @@
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.2" />
     <PackageReference Include="RepoDb.SqlServer.BulkOperations" Version="1.13.1" />
     <PackageReference Include="SharedContracts" Version="1.0.0-pre.202601281117" GeneratePathProperty="true" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
     <Protobuf Include="$(PkgSharedContracts)\content\protos\aac.proto" AdditionalImportDirs="$(PkgSharedContracts)\content\protos" ProtoRoot="$(PkgSharedContracts)\content\protos" GrpcServices="Both" />
   </ItemGroup>
 </Project>

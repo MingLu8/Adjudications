@@ -7,7 +7,7 @@ public static class AacModule
 {    
     public static void MapEndpoints(this IEndpointRouteBuilder app)
     {
-        var apiGroup = app.MapGroup("/api/v1");
+        var apiGroup = app.MapGroup("/api/v1").WithTags("Aac Rest Endpoints");
 
         apiGroup.MapPost("aac", GetAacAsync).WithName("GetAac");
         apiGroup.MapGet("aac/export", ExportAacAsync).WithName("ExportAac");
