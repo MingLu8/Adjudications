@@ -5,6 +5,12 @@ $packageName = "SharedContracts"
 $localFeedPath = "D:\_dev\LocalNuGet"
 $searchRoot = $PSScriptRoot
 
+# Delete the local cache for this specific package
+Remove-Item -Recurse -Force "$env:USERPROFILE\.nuget\packages\sharedcontracts"
+
+# Clear the global NuGet HTTP cache just in case
+# dotnet nuget locals all --clear
+
 # 2. Find the latest version from the local feed
 Write-Host "Searching for latest version of $packageName in $localFeedPath..." -ForegroundColor Cyan
 

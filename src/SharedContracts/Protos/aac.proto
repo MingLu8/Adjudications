@@ -1,10 +1,13 @@
 syntax = "proto3";
 
 option csharp_namespace = "AacApi";
-
 package aac;
 
+import "google/type/date.proto";
+import "google/type/datetime.proto";
+import "google/type/decimal.proto";
 import "google/api/annotations.proto";
+
 service AacService {
   rpc GetAac (AacRequest) returns (AacResponse) {
     option (google.api.http) = { get: "/v1/aac" }; 
@@ -22,32 +25,16 @@ message AacRequest {
   string ndc = 2;
 }
 
-// Self-contained Date definition
-message ProtoDate {
-  int32 year = 1;
-  int32 month = 2;
-  int32 day = 3;
-}
-
-// Self-contained Decimal/Money definition
-message ProtoDecimal {
-  int64 units = 1;
-  sfixed32 nanos = 2;
-}
-
-// Self-contained Timestamp definition
-message ProtoDateTime {
-  int64 seconds = 1;
-  int32 nanos = 2;
-}
-
 message AacResponse {
   string id = 1;
   string state = 2;
   string ndc = 3;
-  ProtoDecimal price = 4;
-  ProtoDate effective_date = 5;
-  ProtoDateTime created_date = 6;
-  ProtoDateTime updated_date = 7;
+  
+  // Use the official imported types here:
+  google.type.Decimal price = 4;
+  google.type.Date effective_date = 5;
+  google.type.DateTime created_date = 6;
+  google.type.DateTime updated_date = 7;
+  
   bool is_active = 8;
 }

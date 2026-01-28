@@ -6,12 +6,12 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Ming Lu</Authors>
 		<Version>1.0.6</Version>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
 	</PropertyGroup>
-	<PropertyGroup>
-		<IncludeHttpRuleProtos>true</IncludeHttpRuleProtos>
-	</PropertyGroup>
+
 	<ItemGroup>
-		<PackageReference Include="Google.Api.CommonProtos" Version="2.17.0" />
+		<PackageReference Include="Google.Api.CommonProtos" Version="2.17.0" GeneratePathProperty="true"/>
 		<PackageReference Include="Google.Protobuf" Version="3.33.4" />
 		<PackageReference Include="Grpc.Net.Client" Version="2.76.0" />
 		<PackageReference Include="Grpc.Tools" Version="2.76.0">
@@ -21,17 +21,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Protobuf Include="Protos\aac.proto" ProtoRoot="Protos" GrpcServices="Both" />
-		<Protobuf Include="Protos\greet.proto" ProtoRoot="Protos" GrpcServices="Both" />
-		<Protobuf Include="Protos\google\api\*.proto" ProtoRoot="Protos" CompileOutputs="false" />
+		<Protobuf Include="Protos\aac.proto" GrpcServices="Both" AdditionalImportDirs="$(PkgGoogle_Api_CommonProtos)\content\protos" />
+		<Protobuf Include="Protos\greet.proto" GrpcServices="Both" AdditionalImportDirs="$(PkgGoogle_Api_CommonProtos)\content\protos" />
 
 		<Content Include="Protos\**\*.proto">
 			<Pack>true</Pack>
-			<PackagePath>content/protos</PackagePath>
+			<PackagePath>contentFiles\any\any\protos\</PackagePath>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+			<BuildAction>None</BuildAction>
 		</Content>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Protos\google\protobuf\" />
 	</ItemGroup>
 </Project>
