@@ -24,9 +24,9 @@
     <PackageReference Include="StackExchange.Redis" Version="2.10.1" />
   </ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
-		<PackageReference Include="Google.Protobuf" Version="3.29.0" />
-		<PackageReference Include="Grpc.Tools" Version="2.67.0" PrivateAssets="All" />
+		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.76.0" />
+		<PackageReference Include="Google.Protobuf" Version="3.33.4" />
+		<PackageReference Include="Grpc.Tools" Version="2.76.0" PrivateAssets="All" />
 	</ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharedContracts\SharedContracts.csproj" />

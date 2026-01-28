@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option csharp_namespace = "AacApi";
+
+package aac;
+
+
+service AacService {
+  rpc GetAac (AacRequest) returns (AacResponse);
+}
+
+message AacRequest {
+  string state = 1;
+  string ndc = 2;
+}
+
+// Self-contained Date definition
+message ProtoDate {
+  int32 year = 1;
+  int32 month = 2;
+  int32 day = 3;
+}
+
+// Self-contained Decimal/Money definition
+message ProtoDecimal {
+  int64 units = 1;
+  sfixed32 nanos = 2;
+}
+
+// Self-contained Timestamp definition
+message ProtoDateTime {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+
+message AacResponse {
+  string id = 1;
+  string state = 2;
+  string ndc = 3;
+  ProtoDecimal price = 4;
+  ProtoDate effective_date = 5;
+  ProtoDateTime created_date = 6;
+  ProtoDateTime updated_date = 7;
+  bool is_active = 8;
+}

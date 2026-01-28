@@ -1,6 +1,5 @@
 ﻿using AacApi.Abstractions;
 using AacApi.Infrastructures;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace AacApi.Modules;
 
@@ -10,9 +9,9 @@ public static class AacModule
     {
         var apiGroup = app.MapGroup("/api/v1");
 
-        apiGroup.MapGet("api/v1/aac", GetAacAsync).WithName("GetAac");
-        apiGroup.MapGet("api/v1/aac/export", ExportAacAsync).WithName("ExportAac");
-        apiGroup.MapPost("api/v1/aac", ImportAacAsync).WithName("ImportAac");
+        apiGroup.MapPost("aac", GetAacAsync).WithName("GetAac");
+        apiGroup.MapGet("aac/export", ExportAacAsync).WithName("ExportAac");
+        apiGroup.MapPost("aac/import", ImportAacAsync).WithName("ImportAac");
     }
 
     private static async Task ImportAacAsync(
@@ -43,15 +42,15 @@ public static class AacModule
     }
 
     private static async Task<IResult> GetAacAsync(
-        string state,
-        string ndc,
-        IAacRepository aacRepository,
+        AacRequest request,
+        IAacRepository  aacRepository,
         ILoggerFactory loggerFactory,
         HttpContext context,
         CancellationToken token
         )
     {
-            var aac = await aacRepository.GetByStateAndNdcAsync(state, ndc);
+        //var request = new AacRequest { State = state, Ndc = ndc };
+            var aac = await aacRepository.GetByStateAndNdcAsync(request.State, request.Ndc);
             return Results.Ok(aac);
     }
 

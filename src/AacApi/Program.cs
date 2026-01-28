@@ -1,4 +1,6 @@
+using AacApi;
 using AacApi.Abstractions;
+using AacApi.AppServices;
 using AacApi.Extensions;
 using AacApi.Infrastructures;
 using AacApi.Modules;
@@ -7,7 +9,8 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 // 1. Add gRPC with Transcoding
-builder.Services.AddGrpc().AddJsonTranscoding();
+builder.Services.AddGrpc();//.AddJsonTranscoding();
+builder.Services.AddGrpcReflection();
 
 // 2. Add gRPC Swagger Integration
 //builder.Services.AddGrpcSwagger();
@@ -41,7 +44,10 @@ if (app.Environment.IsDevelopment())
         options.Title = "My .NET 10 API";
         options.Theme = ScalarTheme.Moon;
     });
+    app.MapGrpcReflectionService();
 }
+app.MapGrpcService<AacGrpcService>();
 app.MapEndpoints();
+
 GlobalConfiguration.Setup().UseSqlServer();
 app.Run();
