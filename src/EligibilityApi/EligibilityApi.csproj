@@ -8,6 +8,6 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
-    <PackageReference Include="SharedContracts" Version="1.0.0-pre.202601281450" GeneratePathProperty="true" />
+    <PackageReference Include="SharedContracts" Version="1.0.0-pre.202601291326" GeneratePathProperty="true" />
   </ItemGroup>
 </Project>

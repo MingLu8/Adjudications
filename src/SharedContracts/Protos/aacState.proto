@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option csharp_namespace = "SharedContracts";
+
+package SharedContracts;
+
+enum AacState {
+	AAC_STATE_UNSPECIFIED = 0;
+	AAC_STATE_AL = 1;
+}
+

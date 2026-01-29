@@ -21,9 +21,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Protobuf Include="Protos\aac.proto" GrpcServices="Both" AdditionalImportDirs="$(PkgGoogle_Api_CommonProtos)\content\protos" />
-		<Protobuf Include="Protos\greet.proto" GrpcServices="Both" AdditionalImportDirs="$(PkgGoogle_Api_CommonProtos)\content\protos" />
-
+		<Protobuf Include="Protos\aacState.proto" GrpcServices="None" AdditionalImportDirs="Protos;$(PkgGoogle_Api_CommonProtos)\content\protos" />
+		<Protobuf Include="Protos\aac.proto" GrpcServices="Both" AdditionalImportDirs="Protos;$(PkgGoogle_Api_CommonProtos)\content\protos" />
+		<Protobuf Include="Protos\greet.proto" GrpcServices="Both" AdditionalImportDirs="Protos;$(PkgGoogle_Api_CommonProtos)\content\protos" />
+		
 		<Content Include="Protos\**\*.proto">
 			<Pack>true</Pack>
 			<PackagePath>contentFiles\any\any\protos\</PackagePath>

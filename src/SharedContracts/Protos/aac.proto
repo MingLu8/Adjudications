@@ -3,10 +3,13 @@ syntax = "proto3";
 option csharp_namespace = "AacApi";
 package aac;
 
+import "aacState.proto";
+
 import "google/type/date.proto";
 import "google/type/datetime.proto";
 import "google/type/decimal.proto";
 import "google/api/annotations.proto";
+
 
 service AacService {
   rpc GetAac (AacRequest) returns (AacResponse) {
@@ -21,13 +24,13 @@ service AacService {
 }
 
 message AacRequest {
-  string state = 1;
+  SharedContracts.AacState state = 1;
   string ndc = 2;
 }
 
 message AacResponse {
   string id = 1;
-  string state = 2;
+  SharedContracts.AacState state = 2;
   string ndc = 3;
   
   // Use the official imported types here:

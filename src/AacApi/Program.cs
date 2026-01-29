@@ -6,12 +6,20 @@ using AacApi.Modules;
 using Microsoft.OpenApi;
 using RepoDb;
 using Scalar.AspNetCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 // --- 1. gRPC & TRANSCODING ---
 // AddJsonTranscoding is what turns the .proto 'google.api.http' into REST routes
-builder.Services.AddGrpc().AddJsonTranscoding();
+builder.Services.AddGrpc().AddJsonTranscoding(options =>
+{
+    // This allows the JSON to use the name without the prefix if configured, 
+    // but Protobuf is strictly case-sensitive.
+    //options.JsonSettings.PropertyNameCaseInsensitive = true;
+    //options.JsonSettings.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSettings.PropertyNameCaseInsensitive = true;
+});
 builder.Services.AddGrpcReflection();
 
 // This is the bridge that tells Swagger how to read gRPC metadata

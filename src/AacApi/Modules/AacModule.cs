@@ -1,5 +1,7 @@
 ﻿using AacApi.Abstractions;
 using AacApi.Infrastructures;
+using Microsoft.AspNetCore.Mvc;
+using SharedContracts;
 
 namespace AacApi.Modules;
 
@@ -15,7 +17,7 @@ public static class AacModule
     }
 
     private static async Task ImportAacAsync(
-       string state,
+       AacState state,
        IFileDownloadService downloadService,
        IExcelParserService parser,
        IAacRepository aacRepository,
@@ -41,8 +43,17 @@ public static class AacModule
         }
     }
 
+    //State enum values in the request don't work at all, tried al, AL, Al, AAC_STATE_AL, etc, only value worked is 1.
+    //This is another reason to move away from protobuf messages in public APIs.
+    //but the transcoded endpoint /v1/aac works fine with
+    //{
+    //  "state": "AAC_STATE_AL",
+    //  "ndc": "00093929419"
+    //}
     private static async Task<IResult> GetAacAsync(
-        AacRequest request,
+        //AacState state,
+        //string ndc,
+        [FromBody]AacRequest request,
         IAacRepository  aacRepository,
         ILoggerFactory loggerFactory,
         HttpContext context,

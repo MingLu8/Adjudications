@@ -1,6 +1,7 @@
 ﻿using AacApi.Abstractions;
 using Microsoft.Data.SqlClient;
 using RepoDb;
+using SharedContracts;
 namespace AacApi.Infrastructures;
 
 public class AacRepository(ISqlConnectionFactory connectionFactory) : IAacRepository
@@ -11,7 +12,7 @@ public class AacRepository(ISqlConnectionFactory connectionFactory) : IAacReposi
         return (await connection.QueryAsync<Aac>(id)).FirstOrDefault();
     }
 
-    public async Task<Aac?> GetByStateAndNdcAsync(string state, string ndc)
+    public async Task<Aac?> GetByStateAndNdcAsync(AacState state, string ndc)
     {
         using var connection = connectionFactory.CreateConnection();
         return (await connection.QueryAsync<Aac>(a=> a.State == state && a.Ndc == ndc)).FirstOrDefault();

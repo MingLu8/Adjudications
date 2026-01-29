@@ -1,4 +1,5 @@
 ﻿using RepoDb.Attributes;
+using SharedContracts;
 using System.ComponentModel.DataAnnotations;
 
 namespace AacApi.Infrastructures;
@@ -7,7 +8,7 @@ namespace AacApi.Infrastructures;
 public class Aac
 {
     public Aac() { }
-    internal Aac(string state, string ndc, decimal price, DateOnly effectiveDate)
+    internal Aac(AacState state, string ndc, decimal price, DateOnly effectiveDate)
     {
         State = state;
         Ndc = ndc;
@@ -21,7 +22,7 @@ public class Aac
 
     [Required]
     [StringLength(2)]
-    public string State { get; set; } = string.Empty;
+    public AacState State { get; set; }
 
     [Required]
     [StringLength(20)]

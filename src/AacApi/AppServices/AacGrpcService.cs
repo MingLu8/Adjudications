@@ -9,6 +9,11 @@ namespace AacApi.AppServices
         public override async Task<AacResponse> GetAac(AacRequest request, ServerCallContext context)
         {
             var aac = await aacRepository.GetByStateAndNdcAsync(request.State, request.Ndc);
+            if (aac == null)
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, $"AAC not found for State: {request.State}, NDC: {request.Ndc}"));
+            }
+
             return new AacResponse
             { 
                 State = aac.State,
