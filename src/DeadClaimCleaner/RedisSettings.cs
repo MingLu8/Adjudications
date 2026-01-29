@@ -1,14 +1,13 @@
-namespace AdjudicationWorker;
+namespace DeadClaimCleaner;
 
 public class RedisSettings
 {
     public string ConnectionString { get; set; } = default!;
-    public string ResponseChannel { get; set; } = "claim-responses";
-    public int MaxProcessingAgeSeconds { get; set; } = 30;
     public string StreamName { get; set; } = "pharmacy-claims";
     public string ConsumerGroup { get; set; } = "adjudication-group";
-    public string ConsumerNamePrefix { get; set; } = "AdjudicationWorker";
-    public int ClaimTimeoutSeconds { get; set; } = 12;
+    public string ConsumerNamePrefix { get; set; } = "DeadClaimCleaner";
+    public int DeadClaimAgeInSeconds { get; set; } = 300;
+
     public string ConsumerName
     {
         get => field ??= $"{ConsumerNamePrefix}-{Environment.MachineName}-{Guid.NewGuid().ToString("N")[..6]}";
