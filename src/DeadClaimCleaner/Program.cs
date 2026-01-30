@@ -1,16 +1,16 @@
 using DeadClaimCleaner;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults()
-    .ConfigureServices((ctx, services) =>
-    {
-        services.AddApplicationInsightsTelemetryWorkerService();
-        services.ConfigureFunctionsApplicationInsights();              
-        services.ConfigureAppDependencies(ctx.Configuration);
-    })
-    .Build();
+var builder = FunctionsApplication.CreateBuilder(args);
+builder.Services
+    .AddApplicationInsightsTelemetryWorkerService()
+    .ConfigureFunctionsApplicationInsights()
+    .ConfigureAppDependencies(builder.Configuration);
 
+builder.UseMiddleware<GlobalExceptionMiddleware>();
+
+var host = builder.Build();
 host.Run();

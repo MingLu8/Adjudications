@@ -4,6 +4,7 @@ using ApiGateway.Infrastructures;
 using Confluent.Kafka;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
+using SharedKernel.Extensions;
 
 namespace ApiGateway.Extensions;
 
@@ -30,15 +31,6 @@ public static class InfrastructureExtensions
         services.AddSingleton<ClaimGatewayService>(); 
         services.AddHostedService<EgressBridgeService>();
 
-        return services;
-    }
-
-    public static IServiceCollection AddAppSettings<T>(
-    this IServiceCollection services,
-    IConfiguration config, string sectionName) where T : class
-    {
-        services.Configure<T>(config.GetSection(sectionName));
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<T>>().Value);
         return services;
     }
 }

@@ -16,8 +16,11 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.76.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.33.4" />
+    <PackageReference Include="Google.Protobuf" Version="3.33.5" />
     <PackageReference Include="Grpc.Tools" Version="2.76.0" PrivateAssets="All" />
     <PackageReference Include="SharedContracts" Version="1.0.0-pre.202601291326" GeneratePathProperty="true" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
 </Project>

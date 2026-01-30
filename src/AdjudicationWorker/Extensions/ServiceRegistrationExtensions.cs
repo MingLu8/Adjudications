@@ -2,6 +2,8 @@
 using AdjudicationWorker.ApiClients;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
+using SharedKernel.Extensions;
+
 namespace AdjudicationWorker;
 
 public static class ServiceRegistrationExtensions
@@ -10,7 +12,6 @@ public static class ServiceRegistrationExtensions
         this IServiceCollection services,
         IConfiguration config)
     {
-        // Strongly typed settings
         services.AddAppSettings<KafkaSettings>(config, "Kafka");
         services.AddAppSettings<RedisSettings>(config, "Redis");
         services.AddAppSettings<WorkerSettings>(config, "Worker");
@@ -24,11 +25,8 @@ public static class ServiceRegistrationExtensions
 
         // Typed API clients
         services.AddTypedApiClient<EligibilityApiClient, IEligibilityApiClient, EligibilityApiSettings>(config, "EligibilityApi");
-
         services.AddTypedApiClient<CoverageApiClient, ICoverageApiClient, CoverageApiSettings>(config, "CoverageApi");
-
         services.AddTypedApiClient<PricingApiClient, IPricingApiClient, PricingApiSettings>(config, "PricingApi");
-
         services.AddSingleton<IFormularyApiClient, FormularyApiClient>();
 
         // Redis
@@ -70,15 +68,6 @@ public static class ServiceRegistrationExtensions
         //// OpenTelemetry ActivitySource
         //services.AddSingleton(new System.Diagnostics.ActivitySource("AdjudicationWorker"));
 
-        return services;
-    }
-
-    public static IServiceCollection AddAppSettings<T>(
-     this IServiceCollection services,
-     IConfiguration config, string sectionName) where T : class
-    {
-        services.Configure<T>(config.GetSection(sectionName));
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<T>>().Value);
         return services;
     }
 }

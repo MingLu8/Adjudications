@@ -14,3 +14,4 @@ public class RedisSettings
         set => field = value;
     }
 }
+
