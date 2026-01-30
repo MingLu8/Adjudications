@@ -24,7 +24,6 @@ namespace DeadClaimCleaner
         public async Task Run([TimerTrigger("%TimerSchedule%")] TimerInfo myTimer)
         {
             _logger.LogInformation($"[{_redisSettings.ConsumerName}] started.");
-            throw new Exception("Test exception from DeadClaimCleaner");
             var autoClaimResult = await _db.StreamAutoClaimAsync(
                 _redisSettings.StreamName,
                 _redisSettings.ConsumerGroup,

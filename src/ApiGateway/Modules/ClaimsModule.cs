@@ -58,19 +58,4 @@ public static class ClaimsModule
             return Results.StatusCode(500);
         }
     }
-
-    private static async Task<string?> ReadRequestBodyAsync(HttpContext ctx, ILogger logger)
-    {
-        try
-        {
-            using var reader = new StreamReader(ctx.Request.Body);
-            return await reader.ReadToEndAsync();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to read request body");
-            return null;
-        }
-    }
-
 }
