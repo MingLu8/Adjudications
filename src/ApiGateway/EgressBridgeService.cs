@@ -2,10 +2,8 @@
 
 using ApiGateway.Abstractions;
 using ApiGateway.ConfigurationSettings;
-using ApiGateway.Infrastructures;
 using SharedContracts;
 using StackExchange.Redis;
-using System.Collections.Concurrent;
 using System.Text.Json;
 
 /// <summary>

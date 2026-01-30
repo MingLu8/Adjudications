@@ -14,7 +14,6 @@ public class ClaimGatewayService(
     {
         var claim = new ClaimRequest(transactionId, ncpdpPayload, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         var tcs = responseMap.Create(claim.TransactionId);
-
         using var timeoutSource = new CancellationTokenSource(TimeSpan.FromSeconds(settings.TimeoutSeconds));
         using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(userToken, timeoutSource.Token);
 

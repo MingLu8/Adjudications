@@ -12,6 +12,7 @@ namespace ApiGateway.Infrastructures
         {
             var tcs = new TaskCompletionSource<ClaimResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             _map.TryAdd(transactionId, tcs);
+            logger.LogInformation("Created connection map for TransactionId: {TransactionId}", transactionId);
             return tcs;
         }
 
@@ -31,8 +32,10 @@ namespace ApiGateway.Infrastructures
             return false;
         }
 
-        public void Remove(string transactionId) => _map.TryRemove(transactionId, out _);
+        public void Remove(string transactionId)
+        {
+            _map.TryRemove(transactionId, out _);
+            logger.LogInformation("Removed connection map for TransactionId: {TransactionId}", transactionId);
+        }
     }
-
-
 }
