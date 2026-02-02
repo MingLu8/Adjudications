@@ -5,6 +5,7 @@ using ApiGateway.ConfigurationSettings;
 using SharedContracts;
 
 public class ClaimGatewayService(
+    IDuplicatedSubmissionChecker duplicatedSubmissionChecker,
     IClaimProducer producer,
     IResponseMap responseMap,
     KafkaSettings settings,
@@ -12,13 +13,15 @@ public class ClaimGatewayService(
 {
     public async Task<ClaimResponse> ProcessAsync(string transactionId, string ncpdpPayload, CancellationToken userToken)
     {
+        await EnsureNoDuplicatedClaim(transactionId, ncpdpPayload, userToken);
+
         var claim = new ClaimRequest(transactionId, ncpdpPayload, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         var tcs = responseMap.Create(claim.TransactionId);
         using var timeoutSource = new CancellationTokenSource(TimeSpan.FromSeconds(settings.TimeoutSeconds));
         using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(userToken, timeoutSource.Token);
 
         try
-        {            
+        {
             await producer.ProduceAsync(claim, linkedSource.Token);
             var response = await tcs.Task.WaitAsync(linkedSource.Token);
 
@@ -43,6 +46,16 @@ public class ClaimGatewayService(
         finally
         {
             responseMap.Remove(claim.TransactionId);
+        }
+    }
+
+    private async Task EnsureNoDuplicatedClaim(string transactionId, string ncpdpPayload, CancellationToken userToken)
+    {
+        var isDuplicate = await duplicatedSubmissionChecker.IsDuplicateAsync(ncpdpPayload, userToken);
+        if (isDuplicate)
+        {
+            logger.LogWarning("Duplicate submission detected for Transaction {Id}", transactionId);
+            throw new DuplicateClaimSubmissionException(ncpdpPayload);
         }
     }
 }

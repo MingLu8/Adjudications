@@ -6,6 +6,7 @@
     <PackageReference Include="StackExchange.Redis" Version="2.10.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
     <PackageReference Include="SharedContracts" Version="1.0.0-pre.202601291326" GeneratePathProperty="true" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />

@@ -2,7 +2,6 @@
 using ApiGateway.ConfigurationSettings;
 using ApiGateway.Infrastructures;
 using Confluent.Kafka;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using SharedKernel.Extensions;
 
@@ -27,6 +26,7 @@ public static class InfrastructureExtensions
         }); 
         services.AddSingleton<IResponseMap, ResponseMap>(); 
        // services.AddSingleton<IClaimProducer, KafkaClaimProducer>(); 
+        services.AddSingleton<IDuplicatedSubmissionChecker, DuplicatedSubmissionChecker>(); 
         services.AddSingleton<IClaimProducer, RedisClaimProducer>(); 
         services.AddSingleton<ClaimGatewayService>(); 
         services.AddHostedService<EgressBridgeService>();
