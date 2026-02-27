@@ -1,35 +1,32 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Authors>Ming Lu</Authors>
-		<Version>1.0.6</Version>
-		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Google.Api.CommonProtos" Version="2.17.0" GeneratePathProperty="true" />
-		<PackageReference Include="Google.Protobuf" Version="3.33.5" />
-		<PackageReference Include="Grpc.Net.Client" Version="2.76.0" />
-		<PackageReference Include="Grpc.Tools" Version="2.76.0">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Protobuf Include="Protos\aacState.proto" GrpcServices="None" AdditionalImportDirs="Protos;$(PkgGoogle_Api_CommonProtos)\content\protos" />
-		<Protobuf Include="Protos\aac.proto" GrpcServices="Both" AdditionalImportDirs="Protos;$(PkgGoogle_Api_CommonProtos)\content\protos" />
-		<Protobuf Include="Protos\greet.proto" GrpcServices="Both" AdditionalImportDirs="Protos;$(PkgGoogle_Api_CommonProtos)\content\protos" />
-		
-		<Content Include="Protos\**\*.proto">
-			<Pack>true</Pack>
-			<PackagePath>contentFiles\any\any\protos\</PackagePath>
-			<PackageCopyToOutput>true</PackageCopyToOutput>
-			<BuildAction>None</BuildAction>
-		</Content>
-	</ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Ming Lu</Authors>
+    <Version>1.0.11</Version>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Google.Api.CommonProtos" GeneratePathProperty="true" />
+    <PackageReference Include="Google.Protobuf" />
+    <PackageReference Include="Grpc.Net.Client" />
+    <PackageReference Include="Grpc.Tools">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Protobuf Include="Protos\aacState.proto" GrpcServices="None" AdditionalImportDirs="Protos;$(PkgGoogle_Api_CommonProtos)\content\protos" />
+    <Protobuf Include="Protos\aac.proto" GrpcServices="Both" AdditionalImportDirs="Protos;$(PkgGoogle_Api_CommonProtos)\content\protos" />
+    <Protobuf Include="Protos\greet.proto" GrpcServices="Both" AdditionalImportDirs="Protos;$(PkgGoogle_Api_CommonProtos)\content\protos" />
+    <Content Include="Protos\**\*.proto">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles\any\any\protos\</PackagePath>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+      <BuildAction>None</BuildAction>
+    </Content>
+  </ItemGroup>
 </Project>

@@ -1,0 +1,29 @@
+﻿<Solution>
+  <Folder Name="/src/">
+    <File Path="README.md" />
+    <Project Path="src/AdjudicationWorker/AdjudicationWorker.csproj" />
+    <Project Path="src/ApiGateway/ApiGateway.csproj" />
+    <Project Path="src/SharedContracts/SharedContracts.csproj" />
+    <Project Path="src/EligibilityApi/EligibilityApi.csproj" />
+    <Project Path="src/CoverageApi/CoverageApi.csproj" />
+    <Project Path="src/PricingApi/PricingApi.csproj" />
+    <Project Path="src/FormularyApi/FormularyApi.csproj" />
+    <Project Path="src/AacApi/AacApi.csproj" />
+    <Project Path="src/DeadClaimCleaner/DeadClaimCleaner.csproj" />
+    <Project Path="src/SharedKernel/SharedKernel.csproj" />
+  </Folder>
+
+  <Folder Name="/tests/">
+    <Project Path="tests/SharedKernelTests/SharedKernelTests.csproj" />
+  </Folder>
+
+  <Folder Name="/Solution Items/">
+    <File Path="alabama_aac.sql" />
+    <File Path="Directory.Packages.props" />
+    <File Path="docker-compose.yml" />
+    <File Path="keda-scaler.yaml" />
+    <File Path="nuget.config" />
+    <File Path="pack-shared-contracts.ps1" />
+    <File Path="start-worker.bat" />
+  </Folder>
+</Solution>

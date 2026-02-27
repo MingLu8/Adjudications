@@ -2,7 +2,7 @@
 
 # 1. Configuration
 $packageName = "SharedContracts"
-$localFeedPath = "D:\_dev\LocalNuGet"
+$localFeedPath = ".\LocalNuGet"
 $searchRoot = $PSScriptRoot
 
 # Delete the local cache for this specific package
