@@ -14,11 +14,26 @@ public static class InfrastructureExtensions
         services.AddAppSettings<KafkaSettings>(config, "Kafka");
         services.AddAppSettings<RedisSettings>(config, "Redis");
 
-        services.AddSingleton<IConnectionMultiplexer>(sp => 
-        { 
+        services.AddSingleton<IConnectionMultiplexer>(sp =>
+        {
             var cfg = sp.GetRequiredService<RedisSettings>();
-            return ConnectionMultiplexer.Connect(cfg.ConnectionString); 
-        }); 
+            var options = ConfigurationOptions.Parse(cfg.ConnectionString);
+
+            // We set these to ensure that even when it eventually connects, it doesn't panic
+            options.AbortOnConnectFail = false;
+            options.ConnectRetry = 10;
+            options.ReconnectRetryPolicy = new ExponentialRetry(5000); // Retry every 5s
+
+            // By using a Lazy wrapper, the 'Connect' method isn't called 
+            // until the first time you call GetDatabase()
+            var lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
+            {
+                Console.WriteLine($"[Redis] Executing delayed connection to {cfg.ConnectionString}...");
+                return ConnectionMultiplexer.Connect(options);
+            });
+
+            return lazyConnection.Value;
+        });
         services.AddSingleton(sp => 
         {
             var cfg = sp.GetRequiredService<KafkaSettings>(); 

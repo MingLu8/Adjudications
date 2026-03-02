@@ -1,4 +1,4 @@
-﻿<Solution>
+<Solution>
   <Folder Name="/src/">
     <File Path="README.md" />
     <Project Path="src/AdjudicationWorker/AdjudicationWorker.csproj" />
@@ -24,6 +24,6 @@
     <File Path="keda-scaler.yaml" />
     <File Path="nuget.config" />
     <File Path="pack-shared-contracts.ps1" />
-    <File Path="start-worker.bat" />
+    <File Path="start-worker.ps1" />
   </Folder>
 </Solution>

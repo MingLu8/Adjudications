@@ -8,7 +8,7 @@ namespace ApiGateway.Infrastructures
     public class RedisClaimProducer(
        IConnectionMultiplexer redis,
        RedisSettings settings,
-       ILogger<KafkaClaimProducer> logger) : IClaimProducer
+       ILogger<RedisClaimProducer> logger) : IClaimProducer
     {
         public async Task ProduceAsync(ClaimRequest claim, CancellationToken token)
         {
