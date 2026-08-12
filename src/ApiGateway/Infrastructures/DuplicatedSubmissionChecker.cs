@@ -15,13 +15,13 @@ public class DuplicatedSubmissionChecker : IDuplicatedSubmissionChecker
     {
         _db = redis.GetDatabase();
     }
-    public async Task<bool> IsDuplicateAsync(string ncpdp, CancellationToken token)
+    public async Task<bool> IsUniqueAsync(string ncpdp, CancellationToken token)
     {
         var key = ncpdp.GetHash();
         return await _db.StringSetAsync(
             key,
             "locked",
-            TimeSpan.FromSeconds(1),
+            TimeSpan.FromSeconds(10),
             When.NotExists
         );      
     }

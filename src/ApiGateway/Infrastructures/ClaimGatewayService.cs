@@ -2,37 +2,74 @@
 
 using ApiGateway.Abstractions;
 using ApiGateway.ConfigurationSettings;
+using Microsoft.Extensions.Options;
 using SharedContracts;
+
+//public class ClaimProcessorSettings
+//{
+//    public int TimeoutSeconds { get; set; }
+//}
+
+//public class ClaimProcessorSettingsValidator : IValidateOptions<ClaimProcessorSettings>
+//{
+//    public ValidateOptionsResult Validate(string? name, ClaimProcessorSettings options)
+//    {
+//        return options.TimeoutSeconds > 0
+//            ? ValidateOptionsResult.Success
+//            : ValidateOptionsResult.Fail("TimeoutSeconds must be greater than zero.");
+//    }
+//}
 
 public class ClaimGatewayService(
     IDuplicatedSubmissionChecker duplicatedSubmissionChecker,
     IClaimProducer producer,
     IResponseMap responseMap,
     KafkaSettings settings,
-    ILogger<ClaimGatewayService> logger)
+    ILogger<ClaimGatewayService> logger) : IClaimGatewayService
 {
-    public async Task<ClaimResponse> ProcessAsync(string transactionId, string ncpdpPayload, CancellationToken userToken)
+    public async Task<ClaimResponse> ProcessAsync(
+        ClaimRequest claim,
+        CancellationToken userToken)
     {
-        await EnsureNoDuplicatedClaim(transactionId, ncpdpPayload, userToken);
+        using var scope = logger.BeginScope(new Dictionary<string, object>
+        {
+            ["TransactionId"] = claim.TransactionId   
+        });
 
-        var claim = new ClaimRequest(transactionId, ncpdpPayload, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-        var tcs = responseMap.Create(claim.TransactionId);
         using var timeoutSource = new CancellationTokenSource(TimeSpan.FromSeconds(settings.TimeoutSeconds));
         using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(userToken, timeoutSource.Token);
 
+        // Dedup check now bound by the same timeout budget as the rest of the pipeline
+        await EnsureNoDuplicatedClaim(claim, linkedSource.Token);
+
+        TaskCompletionSource<ClaimResponse>? tcs = null;
+
         try
         {
-            await producer.ProduceAsync(claim, linkedSource.Token);
-            var response = await tcs.Task.WaitAsync(linkedSource.Token);
+            // Throws DuplicateTransactionException if a collision is found —
+            // propagates untouched, not caught below.
+            tcs = responseMap.Create(claim.TransactionId);
 
+            try
+            {
+                await producer.ProduceAsync(claim, linkedSource.Token);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                logger.LogError(ex, "Failed to produce claim for Transaction {Id}", claim.TransactionId);
+                tcs.TrySetCanceled();
+                throw new ClaimProducerException($"Failed to submit claim {claim.TransactionId} for processing.", ex);
+            }
+
+            var response = await tcs.Task.WaitAsync(linkedSource.Token);
             return response;
         }
         catch (OperationCanceledException ex)
         {
-            bool isTimeout = timeoutSource.IsCancellationRequested;
+            var isTimeout = timeoutSource.IsCancellationRequested;
 
             // Critical: Ensure the TCS is marked as cancelled so the Bridge doesn't process it late
-            tcs.TrySetCanceled(linkedSource.Token);
+            tcs?.TrySetCanceled(linkedSource.Token);
 
             if (isTimeout)
             {
@@ -49,13 +86,13 @@ public class ClaimGatewayService(
         }
     }
 
-    private async Task EnsureNoDuplicatedClaim(string transactionId, string ncpdpPayload, CancellationToken userToken)
+    private async Task EnsureNoDuplicatedClaim(ClaimRequest claim, CancellationToken userToken)
     {
-        var isDuplicate = await duplicatedSubmissionChecker.IsDuplicateAsync(ncpdpPayload, userToken);
-        if (isDuplicate)
+        var isUnique = await duplicatedSubmissionChecker.IsUniqueAsync(claim.NcpdpPayload, userToken);
+        if (!isUnique)
         {
-            logger.LogWarning("Duplicate submission detected for Transaction {Id}", transactionId);
-            throw new DuplicateClaimSubmissionException(ncpdpPayload);
+            logger.LogWarning("Duplicate submission detected for Transaction {Id}", claim.TransactionId);
+            throw new DuplicateClaimSubmissionException(claim.NcpdpPayload);
         }
     }
 }

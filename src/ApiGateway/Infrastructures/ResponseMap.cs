@@ -11,25 +11,33 @@ namespace ApiGateway.Infrastructures
         public TaskCompletionSource<ClaimResponse> Create(string transactionId)
         {
             var tcs = new TaskCompletionSource<ClaimResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
-            _map.TryAdd(transactionId, tcs);
-            logger.LogInformation("Created connection map for TransactionId: {TransactionId}", transactionId);
+
+            if (!_map.TryAdd(transactionId, tcs))
+            {
+                logger.LogWarning("Duplicate pending response entry for TransactionId: {TransactionId}", transactionId);
+                throw new DuplicateTransactionException(transactionId);
+            }
+
+            logger.LogDebug("Registered pending response for TransactionId: {TransactionId}", transactionId);
             return tcs;
         }
 
         public bool TryResolve(string transactionId, ClaimResponse response)
         {
-            if (_map.TryRemove(transactionId, out var tcs))
+            if (!_map.TryRemove(transactionId, out var tcs))
             {
-                logger.LogInformation("Connection found for TransactionId: {TransactionId}", transactionId);
-                if(tcs.TrySetResult(response))
-                    logger.LogInformation("Forworded response for TransactionId: {TransactionId}", transactionId);
-                else
-                    logger.LogWarning("Failed to forward response for TransactionId: {TransactionId}", transactionId);
-                return true;
-            }
-            else
                 logger.LogWarning("Connection not found for TransactionId: {TransactionId}", transactionId);
-            return false;
+                return false;
+            }
+
+            logger.LogDebug("Connection found for TransactionId: {TransactionId}", transactionId);
+
+            if (tcs.TrySetResult(response))
+                logger.LogDebug("Forwarded response for TransactionId: {TransactionId}", transactionId);
+            else
+                logger.LogWarning("Failed to forward response for TransactionId: {TransactionId}", transactionId);
+
+            return true;
         }
 
         public void Remove(string transactionId)

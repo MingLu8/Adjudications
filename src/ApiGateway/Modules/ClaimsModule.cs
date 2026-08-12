@@ -1,5 +1,6 @@
 ﻿using ApiGateway.Infrastructures;
 using Microsoft.AspNetCore.Mvc;
+using SharedContracts;
 
 namespace ApiGateway.Modules;
 
@@ -16,14 +17,14 @@ public static class ClaimsModule
     private static async Task<IResult> AdjudicateClaim(
         [FromBody] string ncpdp,
         HttpContext ctx,
-        ClaimGatewayService gateway,
+        IClaimGatewayService gateway,
         ILoggerFactory loggerFactory,
         CancellationToken token)
     {
         var logger = loggerFactory.CreateLogger("ClaimsModule");
         var remoteIp = ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-        var transationId = Guid.NewGuid().ToString();
-        logger.LogInformation("Adjudicate request received RemoteIp={RemoteIp}, TransactionId={transationId}", remoteIp, transationId);
+        var transactionId = Guid.NewGuid().ToString();
+        logger.LogInformation("Adjudicate request received RemoteIp={RemoteIp}, TransactionId={transationId}", remoteIp, transactionId);
 
         //var ncpdp = await ReadRequestBodyAsync(ctx, logger);
         if (ncpdp is null)
@@ -33,14 +34,20 @@ public static class ClaimsModule
 
         try
         {
-            var result = await gateway.ProcessAsync(transationId, ncpdp, token);
+            var claim = new ClaimRequest(transactionId, ncpdp, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            var result = await gateway.ProcessAsync(claim, token);
             logger.LogInformation("Adjudication completed RemoteIp={RemoteIp}", remoteIp);
-            if (transationId != result.TransactionId)
+            if (transactionId != result.TransactionId)
             {
-                logger.LogError("TransactionId mismatch RemoteIp={RemoteIp}, Expected={Expected}, Actual={Actual}", remoteIp, transationId, result.TransactionId);
-                return Results.InternalServerError(new { transationId, result });
+                logger.LogError("TransactionId mismatch RemoteIp={RemoteIp}, Expected={Expected}, Actual={Actual}", remoteIp, transactionId, result.TransactionId);
+                return Results.InternalServerError(new { transactionId, result });
             }
-            return Results.Ok(new { transationId, result});
+            return Results.Ok(new { transactionId, result});
+        }
+        catch(DuplicateClaimSubmissionException ex)
+        {
+            logger.LogError(ex, $"duplicated claim submission, claim:'{ncpdp}'.");
+            return Results.BadRequest(new { Error = "duplicated claim submission.", Claim = ncpdp });
         }
         catch (TimeoutException)
         {

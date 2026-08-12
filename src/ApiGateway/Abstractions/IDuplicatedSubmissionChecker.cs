@@ -2,7 +2,7 @@
 {
     public interface IDuplicatedSubmissionChecker
     {
-         Task<bool> IsDuplicateAsync(string ncpdp, CancellationToken token);
+         Task<bool> IsUniqueAsync(string ncpdp, CancellationToken token);
     }
 
 }

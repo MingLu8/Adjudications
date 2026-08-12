@@ -1,0 +1,39 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "src\\AacApi\\AacApi.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\AdjudicationWorker\\AdjudicationWorker.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\ApiGateway\\ApiGateway.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\CoverageApi\\CoverageApi.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\DeadClaimCleaner\\DeadClaimCleaner.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\EligibilityApi\\EligibilityApi.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\FormularyApi\\FormularyApi.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\PricingApi\\PricingApi.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
