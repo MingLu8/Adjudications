@@ -20,12 +20,12 @@ using SharedContracts;
 //    }
 //}
 
-public class ClaimGatewayService(
+public class ClaimIngestionService(
     IDuplicatedSubmissionChecker duplicatedSubmissionChecker,
-    IClaimProducer producer,
+    IClaimQueue claimQueue,
     IResponseMap responseMap,
     KafkaSettings settings,
-    ILogger<ClaimGatewayService> logger) : IClaimGatewayService
+    ILogger<ClaimIngestionService> logger) : IClaimIngestionService
 {
     public async Task<ClaimResponse> ProcessAsync(
         ClaimRequest claim,
@@ -52,7 +52,7 @@ public class ClaimGatewayService(
 
             try
             {
-                await producer.ProduceAsync(claim, linkedSource.Token);
+                await claimQueue.AddAsync(claim, linkedSource.Token);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {

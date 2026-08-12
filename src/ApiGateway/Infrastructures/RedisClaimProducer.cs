@@ -8,9 +8,9 @@ namespace ApiGateway.Infrastructures
     public class RedisClaimProducer(
        IConnectionMultiplexer redis,
        RedisSettings settings,
-       ILogger<RedisClaimProducer> logger) : IClaimProducer
+       ILogger<RedisClaimProducer> logger) : IClaimQueue
     {
-        public async Task ProduceAsync(ClaimRequest claim, CancellationToken token)
+        public async Task AddAsync(ClaimRequest claim, CancellationToken token)
         {
             try
             {

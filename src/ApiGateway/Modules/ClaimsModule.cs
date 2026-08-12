@@ -17,7 +17,7 @@ public static class ClaimsModule
     private static async Task<IResult> AdjudicateClaim(
         [FromBody] string ncpdp,
         HttpContext ctx,
-        IClaimGatewayService gateway,
+        IClaimIngestionService claimIngestionService,
         ILoggerFactory loggerFactory,
         CancellationToken token)
     {
@@ -35,7 +35,7 @@ public static class ClaimsModule
         try
         {
             var claim = new ClaimRequest(transactionId, ncpdp, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-            var result = await gateway.ProcessAsync(claim, token);
+            var result = await claimIngestionService.ProcessAsync(claim, token);
             logger.LogInformation("Adjudication completed RemoteIp={RemoteIp}", remoteIp);
             if (transactionId != result.TransactionId)
             {

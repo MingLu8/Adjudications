@@ -2,7 +2,7 @@
 
 namespace ApiGateway.Infrastructures
 {
-    public interface IClaimGatewayService
+    public interface IClaimIngestionService
     {
         Task<ClaimResponse> ProcessAsync(ClaimRequest claim, CancellationToken userToken);
     }

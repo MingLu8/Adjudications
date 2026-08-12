@@ -4,14 +4,14 @@ using ApiGateway.Infrastructures;
 using Confluent.Kafka;
 using StackExchange.Redis;
 using SharedKernel.Extensions;
-using Microsoft.Extensions.Options;
 
 namespace ApiGateway.Extensions;
 
-public static class InfrastructureExtensions
+public static class DependencyResolutions
 {
     public static IServiceCollection AddGatewayInfrastructure(this IServiceCollection services, IConfiguration config)
     {
+        services.AddAppSettings<ClaimProcessorSettings>(config, "ClaimProcessor");
         services.AddAppSettings<KafkaSettings>(config, "Kafka");
         services.AddAppSettings<RedisSettings>(config, "Redis");
 
@@ -43,15 +43,15 @@ public static class InfrastructureExtensions
         services.AddSingleton<IResponseMap, ResponseMap>(); 
        // services.AddSingleton<IClaimProducer, KafkaClaimProducer>(); 
         services.AddSingleton<IDuplicatedSubmissionChecker, DuplicatedSubmissionChecker>(); 
-        services.AddSingleton<IClaimProducer, RedisClaimProducer>(); 
-        services.AddSingleton<IClaimGatewayService, ClaimGatewayService>();
+        services.AddSingleton<IClaimQueue, RedisClaimProducer>(); 
+        services.AddSingleton<IClaimIngestionService, ClaimIngestionService>();
 
         //services.AddOptions<ClaimProcessorSettings>()
         //    .Bind(config.GetSection("ClaimProcessor"))
         //    .ValidateOnStart();
         //services.AddSingleton<IValidateOptions<ClaimProcessorSettings>, ClaimProcessorSettingsValidator>();
 
-
+        services.AddHostedService<ResponseMapSweeper>();
         services.AddHostedService<EgressBridgeService>();
 
         return services;

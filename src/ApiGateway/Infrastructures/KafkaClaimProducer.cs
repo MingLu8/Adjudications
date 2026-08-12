@@ -11,9 +11,9 @@ namespace ApiGateway.Infrastructures
         IConnectionMultiplexer redis,
         IProducer<Null, string> producer,
         KafkaSettings settings,
-        ILogger<KafkaClaimProducer> logger) : IClaimProducer
+        ILogger<KafkaClaimProducer> logger) : IClaimQueue
     {       
-        public async Task ProduceAsync(ClaimRequest claim, CancellationToken token)
+        public async Task AddAsync(ClaimRequest claim, CancellationToken token)
         {
             try
             {
