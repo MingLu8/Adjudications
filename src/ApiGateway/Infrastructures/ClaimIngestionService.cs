@@ -1,7 +1,7 @@
-﻿namespace ApiGateway.Infrastructures;
+﻿namespace AdjudicationApi.Infrastructures;
 
-using ApiGateway.Abstractions;
-using ApiGateway.ConfigurationSettings;
+using AdjudicationApi.Abstractions;
+using AdjudicationApi.ConfigurationSettings;
 using Microsoft.Extensions.Options;
 using SharedContracts;
 

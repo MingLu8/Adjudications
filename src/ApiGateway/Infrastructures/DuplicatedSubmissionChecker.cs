@@ -1,6 +1,6 @@
-﻿namespace ApiGateway.Infrastructures;
+﻿namespace AdjudicationApi.Infrastructures;
 
-using ApiGateway.Abstractions;
+using AdjudicationApi.Abstractions;
 using SharedKernel.Extensions;
 using StackExchange.Redis;
 

@@ -1,4 +1,4 @@
-﻿namespace ApiGateway.Infrastructures
+﻿namespace AdjudicationApi.Infrastructures
 {
     [Serializable]
     public sealed class DuplicateTransactionException(string transactionId)

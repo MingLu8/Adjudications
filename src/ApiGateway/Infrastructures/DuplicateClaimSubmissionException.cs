@@ -1,5 +1,5 @@
 ﻿
-namespace ApiGateway
+namespace AdjudicationApi
 {
     [Serializable]
     internal class DuplicateClaimSubmissionException : Exception

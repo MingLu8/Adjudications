@@ -1,7 +1,7 @@
-﻿namespace ApiGateway;
+﻿namespace AdjudicationApi;
 
-using ApiGateway.Abstractions;
-using ApiGateway.ConfigurationSettings;
+using AdjudicationApi.Abstractions;
+using AdjudicationApi.ConfigurationSettings;
 using SharedContracts;
 using StackExchange.Redis;
 using System.Text.Json;
@@ -12,7 +12,7 @@ using System.Text.Json;
 /// </summary>
 public class EgressBridgeService(
     IConnectionMultiplexer redis,
-    IResponseMap map,
+    IResponseMap responseMap,
     RedisSettings redisSettings,
     ILogger<EgressBridgeService> logger) : BackgroundService
 {
@@ -56,7 +56,7 @@ public class EgressBridgeService(
             }
 
             // Check if this specific Gateway instance is waiting for this TransactionId
-            if (map.TryResolve(response.TransactionId, response))
+            if (responseMap.TryResolve(response.TransactionId, response))
             {
                 logger.LogDebug("Local match found! Resolving TransactionId: {Id}", response.TransactionId);
             }

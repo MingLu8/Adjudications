@@ -1,4 +1,4 @@
-﻿namespace ApiGateway.Abstractions
+﻿namespace AdjudicationApi.Abstractions
 {
     public interface IDuplicatedSubmissionChecker
     {

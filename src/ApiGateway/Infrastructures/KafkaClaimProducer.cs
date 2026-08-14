@@ -1,11 +1,11 @@
-﻿using ApiGateway.Abstractions;
-using ApiGateway.ConfigurationSettings;
+﻿using AdjudicationApi.Abstractions;
+using AdjudicationApi.ConfigurationSettings;
 using Confluent.Kafka;
 using SharedContracts;
 using StackExchange.Redis;
 using System.Text.Json;
 
-namespace ApiGateway.Infrastructures
+namespace AdjudicationApi.Infrastructures
 {
     public class KafkaClaimProducer(
         IConnectionMultiplexer redis,

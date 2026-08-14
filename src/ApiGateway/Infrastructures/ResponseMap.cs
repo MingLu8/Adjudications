@@ -1,8 +1,8 @@
-﻿using ApiGateway.Abstractions;
+﻿using AdjudicationApi.Abstractions;
 using SharedContracts;
 using System.Collections.Concurrent;
 
-namespace ApiGateway.Infrastructures;
+namespace AdjudicationApi.Infrastructures;
 
 // =====================================================================
 // IResponseMap.cs

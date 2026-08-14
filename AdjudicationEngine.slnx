@@ -2,9 +2,9 @@
   <Folder Name="/src/">
     <File Path="README.md" />
     <Project Path="src/AdjudicationWorker/AdjudicationWorker.csproj" />
-    <Project Path="src/ApiGateway/ApiGateway.csproj" />
     <Project Path="src/SharedContracts/SharedContracts.csproj" />
     <Project Path="src/EligibilityApi/EligibilityApi.csproj" />
+    <Project Path="src/ApiGateway/AdjudicationApi.csproj" />
     <Project Path="src/CoverageApi/CoverageApi.csproj" />
     <Project Path="src/PricingApi/PricingApi.csproj" />
     <Project Path="src/FormularyApi/FormularyApi.csproj" />

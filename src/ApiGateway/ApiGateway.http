@@ -1,4 +1,4 @@
-@ApiGatewayApi_HostAddress = https://localhost:7297
+@AdjudicationApiApi_HostAddress = https://localhost:7297
 
 POST https://localhost:7297/adjudicate 
 Content-Type: text/plain

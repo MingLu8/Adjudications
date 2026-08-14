@@ -1,11 +1,11 @@
-﻿using ApiGateway.Abstractions;
-using ApiGateway.ConfigurationSettings;
-using ApiGateway.Infrastructures;
+﻿using AdjudicationApi.Abstractions;
+using AdjudicationApi.ConfigurationSettings;
+using AdjudicationApi.Infrastructures;
 using Confluent.Kafka;
 using StackExchange.Redis;
 using SharedKernel.Extensions;
 
-namespace ApiGateway.Extensions;
+namespace AdjudicationApi.Extensions;
 
 public static class DependencyResolutions
 {

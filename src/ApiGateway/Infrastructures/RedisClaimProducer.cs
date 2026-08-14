@@ -1,9 +1,9 @@
-﻿using ApiGateway.Abstractions;
-using ApiGateway.ConfigurationSettings;
+﻿using AdjudicationApi.Abstractions;
+using AdjudicationApi.ConfigurationSettings;
 using SharedContracts;
 using StackExchange.Redis;
 
-namespace ApiGateway.Infrastructures
+namespace AdjudicationApi.Infrastructures
 {
     public class RedisClaimProducer(
        IConnectionMultiplexer redis,

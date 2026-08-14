@@ -1,8 +1,8 @@
-﻿using ApiGateway.Infrastructures;
+﻿using AdjudicationApi.Infrastructures;
 using Microsoft.AspNetCore.Mvc;
 using SharedContracts;
 
-namespace ApiGateway.Modules;
+namespace AdjudicationApi.Modules;
 
 public static class ClaimsModule
 {

@@ -1,6 +1,6 @@
 ﻿using SharedContracts;
 
-namespace ApiGateway.Infrastructures
+namespace AdjudicationApi.Infrastructures
 {
     public interface IClaimIngestionService
     {

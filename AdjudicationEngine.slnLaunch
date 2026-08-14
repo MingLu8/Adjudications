@@ -11,7 +11,7 @@
         "Action": "Start"
       },
       {
-        "Path": "src\\ApiGateway\\ApiGateway.csproj",
+        "Path": "src\\ApiGateway\\AdjudicationApi.csproj",
         "Action": "Start"
       },
       {

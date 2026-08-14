@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 
-namespace ApiGateway.Extensions;
+namespace AdjudicationApi.Extensions;
 
 using Microsoft.AspNetCore.Diagnostics;
 using System.Text.Json;

@@ -1,4 +1,4 @@
-﻿namespace ApiGateway.ConfigurationSettings
+﻿namespace AdjudicationApi.ConfigurationSettings
 {
     public class RedisSettings
     {

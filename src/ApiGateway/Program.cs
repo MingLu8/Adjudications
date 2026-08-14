@@ -1,5 +1,5 @@
-using ApiGateway.Extensions;
-using ApiGateway.Modules;
+using AdjudicationApi.Extensions;
+using AdjudicationApi.Modules;
 
 var builder = WebApplication.CreateBuilder(args);
 
